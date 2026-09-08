@@ -13,18 +13,23 @@ export function Loader({ onComplete }: { onComplete: () => void }) {
 
   useGSAP(
     () => {
-      if (prefersReducedMotion()) {
+      let finished = false;
+
+      /* Idempotente: quem chegar primeiro (timeline ou rede de segurança)
+         encerra, o segundo não faz nada. */
+      const finish = () => {
+        if (finished) return;
+        finished = true;
         gsap.set(root.current, { autoAlpha: 0, display: "none" });
         onComplete();
+      };
+
+      if (prefersReducedMotion()) {
+        finish();
         return;
       }
 
-      const tl = gsap.timeline({
-        onComplete: () => {
-          gsap.set(root.current, { display: "none" });
-          onComplete();
-        },
-      });
+      const tl = gsap.timeline({ onComplete: finish });
 
       tl.fromTo(
         mark.current,
@@ -34,6 +39,21 @@ export function Loader({ onComplete }: { onComplete: () => void }) {
         // O wordmark sai antes do painel para o fundo não "descolar" do texto.
         .to(mark.current, { opacity: 0, duration: 0.35, ease: "power2.in" }, 0.95)
         .to(root.current, { autoAlpha: 0, duration: 0.5, ease: "power2.inOut" }, 1);
+
+      /* Rede de segurança. O GSAP anda no requestAnimationFrame, e o navegador
+         congela o rAF em aba de fundo — quem abre o site num tab que não está
+         à frente encontraria o loader parado e, pior, o scroll travado, porque
+         é o fim do loader que solta o Lenis. `setTimeout` continua disparando
+         em aba oculta (com throttle), então ele fecha esse buraco.
+
+         2s: a timeline dura 1.5s; a margem cobre um frame lento sem que a
+         rede corte a animação de quem está com a aba visível. */
+      const safety = window.setTimeout(finish, 2000);
+
+      return () => {
+        window.clearTimeout(safety);
+        tl.kill();
+      };
     },
     { scope: root },
   );

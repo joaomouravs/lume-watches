@@ -26,7 +26,15 @@ export function Detail() {
 
   // O gatilho é a moldura, não a seção: a coluna esquerda é sticky e ficaria
   // com um intervalo de scroll muito maior que o próprio deslocamento.
-  useParallax(media, { amount: 10, triggerRef: frame });
+  //
+  // E o parallax só roda no desktop: é lá que o quadro (100svh) é bem mais
+  // alto que a placa 16:9, deixando folga para a foto deslizar. No mobile a
+  // placa preenche o quadro exatamente — mover não teria para onde ir.
+  useParallax(media, {
+    amount: 9,
+    triggerRef: frame,
+    media: "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+  });
   useReveal(root, "[data-spec]", { y: 20, stagger: 0.06, start: "top 72%" });
 
   return (
@@ -36,11 +44,21 @@ export function Detail() {
       aria-labelledby="detalhe-title"
       className="bg-ink md:grid md:grid-cols-2 md:items-start"
     >
+      {/* No mobile o quadro tem a altura da própria placa. No desktop ele vira
+          uma coluna de 100svh e a placa fica centrada nela — o vão de ink em
+          cima e embaixo é o curso do parallax, e é o que permite mostrar o
+          macro inteiro em vez de uma tira do meio. */}
       <div
         ref={frame}
-        className="parallax-frame h-[62svh] md:sticky md:top-0 md:h-[100svh]"
+        className="parallax-frame flex items-center md:sticky md:top-0 md:h-[100svh]"
       >
-        <div ref={media} className="parallax-media">
+        <div
+          ref={media}
+          className="parallax-plate"
+          style={{
+            aspectRatio: `${DETAIL_MACRO.width} / ${DETAIL_MACRO.height}`,
+          }}
+        >
           <Image
             src={DETAIL_MACRO.src}
             alt={DETAIL_MACRO.alt}

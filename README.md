@@ -201,7 +201,17 @@ escolher a imagem do srcset. Sem corrigir, a roda de 12 dentes renderizada com
   escolhe a fonte antes do layout, e nenhum dos dois arquivos é baixado à toa.
 - **Loader → Hero.** O loader publica `ready` por contexto; o Hero só toca a
   entrada depois disso, e o wordmark continua de um tracking mais aberto — como
-  se a tela de abertura tivesse se dissolvido sobre ele.
+  se a tela de abertura tivesse se dissolvido sobre ele. O fim do loader também
+  é o que solta o Lenis, então ele tem uma rede de segurança em `setTimeout`
+  (2s): o GSAP anda no `requestAnimationFrame`, que o navegador congela em aba
+  de fundo — sem a rede, quem abrisse o site num tab que não está à frente
+  encontraria o loader parado e o scroll travado.
+- **Detalhe: a placa manda na moldura, não o contrário.** A foto tem proporção
+  nativa e ocupa toda a largura da coluna; a coluna é que é mais alta que ela, e
+  a folga vertical de ink que sobra é o curso do parallax. O caminho comum
+  (imagem em `cover` numa coluna de 100svh) faz o oposto — escala a foto pela
+  altura e, de um arquivo 16:9, mostra só a tira do meio, ampliada. Aqui não há
+  corte lateral nem upscale.
 - **SplitText manual.** O plugin oficial é pago. O texto fica no HTML como texto
   corrente (SEO, leitores de tela, no-JS) e o split acontece após a montagem: o
   agrupamento em linhas vem do `offsetTop` medido pelo navegador, e um
@@ -218,6 +228,11 @@ escolher a imagem do srcset. Sem corrigir, a roda de 12 dentes renderizada com
   recortaria a seção sem o pin existir e dois modelos ficariam inalcançáveis.
 - **Lifestyle.** O reveal é por `clip-path`, não por escala: a imagem não se
   move, quem se move é a janela por onde ela aparece.
+- **Classes de componente em `@layer components`.** CSS sem camada vence
+  *qualquer* utilitário do Tailwind, independente de especificidade. Enquanto
+  `.parallax-frame` esteve fora de layer, o `position: relative` dela anulava o
+  `md:sticky` da coluna do Detalhe em silêncio — a coluna nunca grudava. Dentro
+  da camada, a ordem volta a ser a esperada: utilitário ganha da classe.
 
 ## Acessibilidade e performance
 

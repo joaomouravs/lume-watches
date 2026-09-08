@@ -140,113 +140,124 @@
   }
 }
 
-.skip-link {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 100;
-  margin: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  background-color: var(--color-bone);
-  color: var(--color-ink);
-  transform: translateY(-150%);
-  transition: transform 0.4s var(--ease-lume);
-}
-.skip-link:focus-visible {
-  transform: translateY(0);
-}
-
-/* SplitText manual -------------------------------------------------------
-   Os wrappers são criados por hooks/useSplitLines.ts. O par padding/margin
-   negativo devolve espaço para descendentes (g, p, ç) que o `overflow: hidden`
-   cortaria rente à baseline. */
-.lume-line {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.14em;
-  margin-bottom: -0.14em;
-}
-
-.lume-line-inner {
-  display: block;
-  will-change: transform;
-}
-
-.lume-word {
-  display: inline-block;
-}
-
-/* Mídia com parallax ----------------------------------------------------
-   A imagem é maior que o contêiner para que o deslocamento nunca exponha uma
-   faixa vazia nas bordas. 118% é o mínimo que cobre o curso de ±5,9% usado
-   pelo hook — sobra qualquer coisa acima disso só amplia o corte da foto. */
-.parallax-frame {
-  position: relative;
-  overflow: hidden;
-}
-
-.parallax-media {
-  position: absolute;
-  inset: -9% 0;
-  height: 118%;
-  width: 100%;
-  will-change: transform;
-}
-
-/* Palco do movimento ----------------------------------------------------
-   Quadrado, centralizado, e dimensionado pelo MENOR entre altura e largura —
-   assim ele nunca estoura a viewport nem em telas baixas nem em telas
-   estreitas. A partir de lg o palco encolhe em vw para abrir a coluna de
-   texto à esquerda em vez de disputar espaço com ela. */
-.movement-stage {
-  position: relative;
-  width: min(56svh, 84vw);
-  aspect-ratio: 1;
-}
-
-@media (min-width: 768px) {
-  .movement-stage {
-    width: min(64svh, 62vw);
+/* Classes de componente ficam em @layer components para que qualquer
+   utilitário do Tailwind (md:sticky, relative, hidden…) as sobrescreva.
+   Fora de layer, CSS sem camada vence QUALQUER utilitário, independente de
+   especificidade — foi assim que o `position: relative` de .parallax-frame
+   anulou o md:sticky da coluna do Detalhe. */
+@layer components {
+  .skip-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    margin: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--color-bone);
+    color: var(--color-ink);
+    transform: translateY(-150%);
+    transition: transform 0.4s var(--ease-lume);
   }
-}
-
-@media (min-width: 1024px) {
-  .movement-stage {
-    width: min(72svh, 48vw);
+  .skip-link:focus-visible {
+    transform: translateY(0);
   }
-}
 
-/* As três camadas de cada peça, cada uma com uma responsabilidade:
+  /* SplitText manual -------------------------------------------------------
+     Os wrappers são criados por hooks/useSplitLines.ts. O par padding/margin
+     negativo devolve espaço para descendentes (g, p, ç) que o `overflow: hidden`
+     cortaria rente à baseline. */
+  .lume-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
 
-   .mv-place  posicionamento e escala base (CSS estático)
-   .mv-boom   afastamento controlado pelo scroll (GSAP: scale + opacity)
-   .mv-spin   rotação própria da peça (CSS infinito, ou GSAP no caso das
-              duas peças oscilantes)
+  .lume-line-inner {
+    display: block;
+    will-change: transform;
+  }
 
-   Separar evita que a timeline de scroll sobrescreva a rotação contínua —
-   os dois efeitos escrevem `transform`, e num elemento só um mataria o outro. */
-.mv-place,
-.mv-boom,
-.mv-spin {
-  position: absolute;
-  inset: 0;
-  transform-origin: center center;
-}
+  .lume-word {
+    display: inline-block;
+  }
 
-.mv-place {
-  transform: translate(calc(var(--mv-x) * 100%), calc(var(--mv-y) * 100%))
-    scale(var(--mv-s));
-}
+  /* Mídia com parallax ----------------------------------------------------
+     A placa mantém a proporção NATIVA do arquivo e ocupa toda a largura da
+     coluna. Num quadro mais alto que ela, a folga vertical que sobra é o curso
+     do parallax — a foto desliza dentro do vão em vez de ser ampliada para
+     preencher a altura. Resultado: nenhum corte lateral e nenhum upscale.
 
-.mv-boom {
-  will-change: transform, opacity;
-}
+     A alternativa comum (imagem em `cover` num quadro alto) faz o oposto: para
+     cobrir 100svh de uma coluna estreita ela é escalada pela altura, e de uma
+     foto 16:9 sobra só o miolo. */
+  .parallax-frame {
+    position: relative;
+    overflow: hidden;
+  }
 
-.mv-spin {
-  will-change: transform;
-}
+  .parallax-plate {
+    position: relative;
+    width: 100%;
+    will-change: transform;
+  }
 
-.mv-spin[data-spin] {
-  animation: lume-rotate var(--mv-duration) linear infinite;
-  animation-direction: var(--mv-direction, normal);
+  /* Palco do movimento ----------------------------------------------------
+     Quadrado, centralizado, e dimensionado pelo MENOR entre altura e largura —
+     assim ele nunca estoura a viewport nem em telas baixas nem em telas
+     estreitas. A partir de lg o palco encolhe em vw para abrir a coluna de
+     texto à esquerda em vez de disputar espaço com ela. */
+  .movement-stage {
+    position: relative;
+    width: min(56svh, 84vw);
+    aspect-ratio: 1;
+  }
+
+  @media (min-width: 768px) {
+    .movement-stage {
+      width: min(64svh, 62vw);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .movement-stage {
+      width: min(72svh, 48vw);
+    }
+  }
+
+  /* As três camadas de cada peça, cada uma com uma responsabilidade:
+
+     .mv-place  posicionamento e escala base (CSS estático)
+     .mv-boom   afastamento controlado pelo scroll (GSAP: scale + opacity)
+     .mv-spin   rotação própria da peça (CSS infinito, ou GSAP no caso das
+                duas peças oscilantes)
+
+     Separar evita que a timeline de scroll sobrescreva a rotação contínua —
+     os dois efeitos escrevem `transform`, e num elemento só um mataria o outro. */
+  .mv-place,
+  .mv-boom,
+  .mv-spin {
+    position: absolute;
+    inset: 0;
+    transform-origin: center center;
+  }
+
+  .mv-place {
+    transform: translate(calc(var(--mv-x) * 100%), calc(var(--mv-y) * 100%))
+      scale(var(--mv-s));
+  }
+
+  .mv-boom {
+    will-change: transform, opacity;
+  }
+
+  .mv-spin {
+    will-change: transform;
+  }
+
+  .mv-spin[data-spin] {
+    animation: lume-rotate var(--mv-duration) linear infinite;
+    animation-direction: var(--mv-direction, normal);
+  }
+
 }
