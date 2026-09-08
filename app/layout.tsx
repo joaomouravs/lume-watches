@@ -3,6 +3,8 @@ import { Instrument_Serif } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { SiteShell } from "@/components/SiteShell";
 import { OG_IMAGE } from "@/lib/images";
+import { StructuredData } from "@/components/StructuredData";
+import { SITE_URL, SITE_DESCRIPTION } from "@/lib/site";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -12,16 +14,13 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-const SITE_URL = "https://lume.watch";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "LUME — Time, quietly.",
     template: "%s · LUME",
   },
-  description:
-    "LUME é uma maison de relógios automáticos de 38 mm. Três referências, um calibre, nenhum ruído. Quiet luxury feito para durar mais que a temporada.",
+  description: SITE_DESCRIPTION,
   applicationName: "LUME",
   keywords: [
     "LUME",
@@ -84,6 +83,7 @@ export default function RootLayout({
           Pular para o conteúdo
         </a>
         <SiteShell>{children}</SiteShell>
+        <StructuredData />
       </body>
     </html>
   );

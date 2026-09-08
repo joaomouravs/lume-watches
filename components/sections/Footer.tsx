@@ -1,65 +1,77 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useReveal } from "@/hooks/useReveal";
+import { NAV_ITEMS, CONTACT_EMAIL, CONTACT_HREF } from "@/lib/nav";
+import { Container } from "@/components/ui/Container";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 
-const LINKS = [
-  { label: "Coleção", href: "#colecao" },
-  { label: "Movimento", href: "#movimento" },
-  { label: "Contato", href: "mailto:atelier@lume.watch" },
-];
+type Status = "idle" | "error" | "done";
 
 function Newsletter() {
-  const [status, setStatus] = useState<"idle" | "done">("idle");
+  const id = useId();
+  const [status, setStatus] = useState<Status>("idle");
   const [email, setEmail] = useState("");
+
+  const message =
+    status === "done"
+      ? "Obrigado. Escrevemos quatro vezes por ano — nunca mais que isso."
+      : status === "error"
+        ? "Confira o endereço: falta o @ ou o domínio."
+        : "Quatro cartas por ano. Nada além disso.";
 
   return (
     <form
-      className="mt-8 max-w-md"
+      noValidate
       onSubmit={(event) => {
         event.preventDefault();
-        setStatus("done");
+        /* Validação própria em vez da nativa: a bolha do navegador não segue a
+           tipografia da página e some sozinha. Aqui a mensagem vive num
+           `aria-live`, então leitor de tela e olho recebem a mesma coisa. */
+        setStatus(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? "done" : "error");
       }}
     >
-      <label htmlFor="newsletter" className="eyebrow">
+      <label htmlFor={id} className="eyebrow">
         Cartas do atelier
       </label>
 
-      {/* A régua é um pseudo-elemento escalado no focus-within: o input não
-          muda de altura, então nada na coluna se desloca quando ele recebe
-          foco. */}
-      <div className="group relative mt-4 flex items-center gap-4 border-b border-bone/20 pb-3 focus-within:border-bone/20">
+      <div className="group relative mt-5 flex items-center gap-4 border-b border-line pb-3">
         <input
-          id="newsletter"
+          id={id}
           name="email"
           type="email"
-          required
           autoComplete="email"
           placeholder="seu@email.com"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="w-full bg-transparent text-body text-bone outline-none placeholder:text-steel"
+          aria-describedby={`${id}-status`}
+          aria-invalid={status === "error"}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (status !== "idle") setStatus("idle");
+          }}
+          className="h-11 w-full bg-transparent text-body text-content outline-none placeholder:text-muted"
         />
         <button
           type="submit"
-          className="eyebrow shrink-0 text-bone transition-[opacity,transform] duration-[800ms] ease-lume hover:-translate-y-px hover:opacity-70"
+          className="tap-target shrink-0 text-[0.6875rem] uppercase leading-none tracking-[0.25em] text-content transition-colors duration-500 ease-lume hover:text-accent"
         >
           Assinar
         </button>
+        {/* A régua é um elemento escalado no focus-within: o input não muda de
+            altura, então nada na coluna se desloca quando ele recebe foco. */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-brass transition-transform duration-[900ms] ease-lume group-focus-within:scale-x-100"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-accent transition-transform duration-700 ease-lume group-focus-within:scale-x-100"
         />
       </div>
 
       <p
+        id={`${id}-status`}
         role="status"
         aria-live="polite"
-        className="mt-4 text-body text-steel transition-opacity duration-[800ms] ease-lume"
+        className={`mt-4 text-body ${status === "error" ? "text-accent" : "text-muted"}`}
       >
-        {status === "done"
-          ? "Obrigado. Escrevemos quatro vezes por ano — nunca mais que isso."
-          : "Quatro cartas por ano. Nada além disso."}
+        {message}
       </p>
     </form>
   );
@@ -73,50 +85,72 @@ export function Footer() {
     <footer
       id="contato"
       ref={root}
-      className="border-t border-bone/10 bg-ink pt-[12svh] pb-12 gutter"
+      className="section-pt border-t border-line bg-canvas pb-12"
     >
-      <div className="grid-12 gap-y-16">
-        <div data-footer-item className="col-span-12 lg:col-span-5">
-          <p className="font-display text-[clamp(3.5rem,10vw,8rem)] leading-none tracking-[-0.02em] text-bone">
-            LUME
-          </p>
-          <p className="mt-6 max-w-[28ch] text-body text-steel">
-            Time, quietly. Genebra, desde 2019.
-          </p>
+      <Container>
+        <div className="grid-12 gap-y-16">
+          <div data-footer-item className="col-span-12 lg:col-span-5">
+            {/* O wordmark grande fecha a página no mesmo tamanho em que ela
+                abriu — é a rima que faz o scroll parecer um percurso e não uma
+                lista. */}
+            <p className="font-display text-mark-sm text-content">
+              LUME
+            </p>
+            <p className="mt-8 max-w-[30ch] text-lead text-muted">
+              Time, quietly. Genebra, desde 2019.
+            </p>
+            <a
+              href={CONTACT_HREF}
+              className="tap-target group mt-8 inline-flex items-center gap-3 text-lead text-content transition-colors duration-500 ease-lume hover:text-accent"
+            >
+              {CONTACT_EMAIL}
+              <span
+                aria-hidden="true"
+                className="block h-px w-6 bg-current transition-transform duration-500 ease-lume group-hover:translate-x-1"
+              />
+            </a>
+          </div>
+
+          <nav
+            data-footer-item
+            aria-label="Rodapé"
+            className="col-span-12 sm:col-span-6 lg:col-span-2 lg:col-start-7"
+          >
+            <Eyebrow as="h2">Navegar</Eyebrow>
+            <ul className="mt-6">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="tap-target group flex items-center justify-between gap-4 border-b border-line py-3 text-body text-subtle transition-colors duration-500 ease-lume hover:text-content"
+                  >
+                    {item.label}
+                    <span
+                      aria-hidden="true"
+                      className="block h-px w-4 bg-current opacity-0 transition-all duration-500 ease-lume group-hover:translate-x-1 group-hover:opacity-100"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div
+            data-footer-item
+            className="col-span-12 sm:col-span-6 lg:col-span-4 lg:col-start-9"
+          >
+            <Newsletter />
+          </div>
         </div>
 
-        <nav
+        <div
           data-footer-item
-          aria-label="Navegação do rodapé"
-          className="col-span-12 sm:col-span-6 lg:col-span-3"
+          className="mt-24 flex flex-col gap-3 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between"
         >
-          <h2 className="eyebrow">Navegar</h2>
-          <ul className="mt-6 space-y-3">
-            {LINKS.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="text-body text-bone/85 transition-colors duration-[800ms] ease-lume hover:text-brass"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div data-footer-item className="col-span-12 sm:col-span-6 lg:col-span-4">
-          <Newsletter />
+          <Eyebrow>© 2026 LUME · Todos os direitos reservados</Eyebrow>
+          <Eyebrow>Projeto fictício · Portfólio front-end</Eyebrow>
         </div>
-      </div>
-
-      <div
-        data-footer-item
-        className="mt-24 flex flex-col gap-3 border-t border-bone/10 pt-8 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p className="eyebrow">© 2026 LUME · Todos os direitos reservados</p>
-        <p className="eyebrow">Projeto fictício · Portfólio front-end</p>
-      </div>
+      </Container>
     </footer>
   );
 }

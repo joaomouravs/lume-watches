@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
@@ -16,7 +16,7 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
  *    salto no scroll virtual em vez de simplesmente continuar de onde parou.
  *
  * Em `prefers-reduced-motion` o Lenis nem é instanciado — o scroll nativo do
- * navegador é a experiência correta.
+ * navegador é a experiência correta, e `scrollTo` cai no `scrollIntoView`.
  */
 export function useSmoothScroll(enabled: boolean) {
   const lenisRef = useRef<Lenis | null>(null);
@@ -28,7 +28,7 @@ export function useSmoothScroll(enabled: boolean) {
       duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       touchMultiplier: 1.6,
-      anchors: true, // links #âncora passam pelo Lenis em vez do salto nativo
+      anchors: { offset: -80 }, // altura do header fixo
     });
     lenisRef.current = lenis;
     if (!enabled) lenis.stop();
@@ -57,4 +57,20 @@ export function useSmoothScroll(enabled: boolean) {
     if (enabled) lenis.start();
     else lenis.stop();
   }, [enabled]);
+
+  /**
+   * Rolagem programática para uma âncora. O menu mobile precisa disto porque
+   * fecha e navega no mesmo gesto: o clique padrão dispararia com o scroll
+   * ainda travado.
+   */
+  const scrollTo = useCallback((hash: string) => {
+    const target = document.querySelector(hash);
+    if (!target) return;
+
+    const lenis = lenisRef.current;
+    if (lenis) lenis.scrollTo(target as HTMLElement, { offset: -80 });
+    else target.scrollIntoView({ block: "start" });
+  }, []);
+
+  return { scrollTo };
 }

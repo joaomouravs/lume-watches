@@ -1,59 +1,113 @@
 @import "tailwindcss";
 
-/* A galeria horizontal só existe quando (a) há largura, (b) há altura para o
-   card inteiro caber na viewport e (c) o usuário aceita movimento. Fora disso
-   ela volta a ser uma pilha vertical. Esta condição é literalmente a mesma de
-   MM.gallery no lib/gsap.ts: se o CSS recortasse a seção sem o pin existir,
-   dois dos três modelos ficariam inalcançáveis. */
-@custom-variant gallery (@media (min-width: 768px) and (min-height: 640px) and (prefers-reduced-motion: no-preference));
-
 /* =========================================================================
    LUME · design system
    ========================================================================= */
 
+/* Variantes ---------------------------------------------------------------
+   `gallery`  — a galeria horizontal só existe quando há largura, altura para o
+                card inteiro caber na viewport e o usuário aceita movimento.
+                É literalmente a mesma condição de MM.gallery em lib/gsap.ts:
+                se o CSS recortasse a seção sem o pin existir, dois dos três
+                modelos ficariam inalcançáveis.
+   `motion-ok` — efeitos puramente decorativos, ligados só quando o usuário
+                aceita movimento. */
+@custom-variant gallery (@media (min-width: 768px) and (min-height: 640px) and (prefers-reduced-motion: no-preference));
+@custom-variant motion-ok (@media (prefers-reduced-motion: no-preference));
+
 @theme {
-  /* Paleta ------------------------------------------------------------- */
+  /* ---------------------------------------------------------------- Paleta
+     Cinco cores. Os tokens semânticos abaixo são o que os componentes usam;
+     estes aqui existem para o caso raro em que a cor precisa ser literal. */
   --color-ink: #0b0b0c;
   --color-bone: #ede9e3;
   --color-steel: #8a8a8f;
   --color-brass: #b8a582;
-  /* Variante escura do steel: sobre --bone o steel puro fica em 2.8:1 e
-     reprova no AA. Este tom mantém a mesma família e entrega 5.6:1. */
+  /* Variante escura do steel: sobre --bone o steel puro dá 2.8:1 e reprova no
+     AA. Este tom mantém a família e entrega 5.6:1. */
   --color-graphite: #5b5b60;
 
-  /* Tipografia --------------------------------------------------------- */
+  /* ------------------------------------------------------ Tokens semânticos
+     Os valores aqui são o tema ESCURO (o padrão da página). A seção clara
+     inverte os mesmos nomes via [data-theme="light"], então nenhum componente
+     precisa saber em que fundo está: `text-muted` é legível nos dois. */
+  --color-canvas: #0b0b0c;
+  --color-surface: #131316;
+  --color-content: #ede9e3;
+  --color-muted: #8a8a8f;
+  --color-subtle: color-mix(in srgb, #ede9e3 55%, transparent);
+  --color-line: color-mix(in srgb, #ede9e3 12%, transparent);
+  --color-line-strong: color-mix(in srgb, #ede9e3 28%, transparent);
+  --color-accent: #b8a582;
+
+  /* ------------------------------------------------------------ Tipografia */
   --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 
-  /* Escala fluida: clamp() em todos os degraus, sem breakpoints no texto. */
-  --text-wordmark: clamp(4.5rem, 21vw, 20rem);
-  --text-wordmark--line-height: 0.8;
-  --text-wordmark--letter-spacing: -0.02em;
+  /* Escala fluida: clamp() em todos os degraus, sem breakpoint no texto.
+     Oito degraus cobrem a página inteira. Fora deles sobram duas exceções
+     deliberadas e de uso único: o wordmark do loader e os links do menu
+     mobile, que escalam com a viewport por decisão de composição. */
+  --text-mark: clamp(4.5rem, 20vw, 18rem);
+  --text-mark--line-height: 0.82;
+  --text-mark--letter-spacing: -0.02em;
 
-  --text-display: clamp(2.75rem, 7vw, 6.5rem);
-  --text-display--line-height: 1.02;
+  /* O wordmark fecha a página menor do que abre — mesma peça, dois pesos. */
+  --text-mark-sm: clamp(3.5rem, 10vw, 7.5rem);
+  --text-mark-sm--line-height: 0.85;
+  --text-mark-sm--letter-spacing: -0.02em;
+
+  --text-display: clamp(2.5rem, 6.4vw, 5.75rem);
+  --text-display--line-height: 1.04;
   --text-display--letter-spacing: -0.02em;
 
-  --text-title: clamp(2rem, 4.4vw, 3.75rem);
+  --text-title: clamp(1.875rem, 4vw, 3.5rem);
   --text-title--line-height: 1.1;
   --text-title--letter-spacing: -0.02em;
 
-  --text-lead: clamp(1.125rem, 1.6vw, 1.5rem);
-  --text-lead--line-height: 1.5;
+  --text-subtitle: clamp(1.3rem, 2.1vw, 1.9rem);
+  --text-subtitle--line-height: 1.2;
+  --text-subtitle--letter-spacing: -0.02em;
+
+  --text-lead: clamp(1.0625rem, 1.35vw, 1.3125rem);
+  --text-lead--line-height: 1.55;
 
   --text-body: clamp(0.9375rem, 1.05vw, 1.0625rem);
   --text-body--line-height: 1.65;
 
-  /* Movimento ---------------------------------------------------------- */
+  /* --------------------------------------------------------------- Layout */
+  /* A margem cresce com a viewport mas TRAVA em 8rem: sem o teto, um monitor
+     de 2560px abriria uma coluna de texto de 2150px. */
+  --gutter: clamp(1.5rem, 7vw, 8rem);
+  --content-max: 88rem;
+  /* Distância entre a borda da viewport e a coluna de conteúdo — a mesma que o
+     .container-lume produz depois de travar no máximo. Seções full-bleed (a
+     galeria horizontal, o palco do movimento) usam isto para encostar na mesma
+     linha vertical do resto da página em telas grandes, em vez de na margem
+     bruta. É % e não vw de propósito: vw inclui a barra de rolagem. */
+  --edge: max(var(--gutter), calc((100% - var(--content-max)) / 2));
+
+  /* -------------------------------------------------------------- Movimento
+     Uma curva para a página inteira. */
   --ease-lume: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Utilitários ------------------------------------------------------------ */
+/* =========================================================================
+   Utilitários
+   ========================================================================= */
 
-/* Margem lateral: 1.5rem no mobile, mínimo de 8vw a partir do momento em que
-   8vw ultrapassa esse valor. Uma expressão só, sem media query. */
+/* Coluna de conteúdo: margem lateral fluida com teto e centralização acima do
+   máximo. Seções full-bleed aplicam isto no filho, não no <section>. */
+@utility container-lume {
+  width: 100%;
+  max-width: calc(var(--content-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Só a margem, para quando o elemento já está dentro de um container. */
 @utility gutter {
-  padding-inline: max(1.5rem, 8vw);
+  padding-inline: var(--gutter);
 }
 
 @utility grid-12 {
@@ -62,34 +116,94 @@
   column-gap: clamp(1rem, 1.6vw, 2rem);
 }
 
+/* Ritmo vertical. Três degraus, usados em toda a página — é o que faz seções
+   diferentes parecerem parte do mesmo documento. */
+@utility section-y {
+  padding-block: clamp(4.5rem, 11svh, 8.5rem);
+}
+@utility section-y-lg {
+  padding-block: clamp(6rem, 15svh, 12rem);
+}
+@utility section-pt {
+  padding-top: clamp(4.5rem, 11svh, 8.5rem);
+}
+
 @utility eyebrow {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  color: var(--color-steel);
+  color: var(--color-muted);
 }
 
-/* Base ------------------------------------------------------------------- */
+/* Escala de z-index. Nomeada em vez de numérica para que ninguém precise
+   adivinhar se 40 fica acima ou abaixo de 50. */
+@utility z-content {
+  z-index: 10;
+}
+@utility z-sticky {
+  z-index: 20;
+}
+@utility z-header {
+  z-index: 50;
+}
+@utility z-overlay {
+  z-index: 80;
+}
+@utility z-loader {
+  z-index: 90;
+}
+
+/* Alvo de toque de 44px sem inflar a caixa visual: a área cresce por um
+   pseudo-elemento, então o texto continua com o line-height do design. */
+@utility tap-target {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    height: max(100%, 44px);
+    translate: 0 -50%;
+  }
+}
+
+/* =========================================================================
+   Base
+   ========================================================================= */
 
 @layer base {
   html {
-    background-color: var(--color-ink);
+    background-color: var(--color-canvas);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Âncoras nativas (sem JS / com movimento reduzido) não podem parar
+       debaixo do header fixo. */
+    scroll-padding-top: 6rem;
   }
 
   body {
-    background-color: var(--color-ink);
-    color: var(--color-bone);
+    background-color: var(--color-canvas);
+    color: var(--color-content);
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
-    overflow-x: hidden;
   }
+
+  /* Inversão de tema. Redefinir os MESMOS tokens semânticos é o que permite
+     um componente usar `text-muted` sem saber sobre que fundo está. */
+  [data-theme="light"] {
+    --color-canvas: #ede9e3;
+    --color-surface: #e3ded6;
+    --color-content: #0b0b0c;
+    --color-muted: #5b5b60;
+    --color-subtle: color-mix(in srgb, #0b0b0c 55%, transparent);
+    --color-line: color-mix(in srgb, #0b0b0c 14%, transparent);
+    --color-line-strong: color-mix(in srgb, #0b0b0c 30%, transparent);
+    --color-accent: #8a744a;
+    }
 
   ::selection {
     background-color: var(--color-brass);
@@ -97,7 +211,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brass);
+    outline: 2px solid var(--color-accent);
     outline-offset: 4px;
     border-radius: 1px;
   }
@@ -113,21 +227,45 @@
   .lenis.lenis-stopped {
     overflow: hidden;
   }
+
+  /* Trava de scroll independente do Lenis: em prefers-reduced-motion ele nem é
+     instanciado, e sem isto o menu abriria com a página rolando por baixo. */
+  html[data-scroll-locked="true"] {
+    overflow: hidden;
+  }
 }
 
-/* Rotação contínua das peças do calibre ------------------------------------
-   Em CSS e não em JS: é composta na GPU, não custa frame de main thread e
-   desliga sozinha em prefers-reduced-motion, sem depender do bundle. */
+/* =========================================================================
+   Keyframes
+   ========================================================================= */
+
+/* Rotação contínua das peças do calibre: em CSS e não em JS porque é composta
+   na GPU, não custa frame de main thread e desliga sozinha em
+   prefers-reduced-motion, sem depender do bundle ter carregado. */
 @keyframes lume-rotate {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Acessibilidade --------------------------------------------------------- */
+/* Traço que desce dentro do trilho do Hero: affordance de scroll. */
+@keyframes lume-scroll-hint {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(250%);
+  }
+}
+
+/* =========================================================================
+   Movimento reduzido
+   ========================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  .mv-spin {
+  .mv-spin,
+  [data-marquee] {
     animation: none !important;
   }
   *,
@@ -140,12 +278,42 @@
   }
 }
 
-/* Classes de componente ficam em @layer components para que qualquer
-   utilitário do Tailwind (md:sticky, relative, hidden…) as sobrescreva.
-   Fora de layer, CSS sem camada vence QUALQUER utilitário, independente de
-   especificidade — foi assim que o `position: relative` de .parallax-frame
-   anulou o md:sticky da coluna do Detalhe. */
+/* =========================================================================
+   Componentes
+
+   Ficam em @layer components para que qualquer utilitário do Tailwind
+   (md:sticky, relative, hidden…) as sobrescreva. Fora de layer, CSS sem
+   camada vence QUALQUER utilitário independente de especificidade — foi assim
+   que o `position: relative` de .parallax-frame anulou o md:sticky da coluna
+   do Detalhe.
+   ========================================================================= */
+
 @layer components {
+  /* Barra fixa. Os dois estados são atributos e não classes utilitárias
+     porque a transição precisa animar a propriedade `translate` — e o
+     utilitário do Tailwind escreve numa custom property que o variant de
+     data-attribute não estava resolvendo. Explícito aqui, previsível. */
+  .site-header {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    translate: 0 0;
+    border-bottom: 1px solid transparent;
+    transition:
+      translate 0.5s var(--ease-lume),
+      background-color 0.5s var(--ease-lume),
+      border-color 0.5s var(--ease-lume);
+  }
+
+  .site-header[data-hidden="true"] {
+    translate: 0 -100%;
+  }
+
+  .site-header[data-scrolled="true"] {
+    background-color: color-mix(in srgb, var(--color-canvas) 92%, transparent);
+    border-bottom-color: var(--color-line);
+  }
+
   .skip-link {
     position: absolute;
     top: 0;
@@ -164,8 +332,8 @@
 
   /* SplitText manual -------------------------------------------------------
      Os wrappers são criados por hooks/useSplitLines.ts. O par padding/margin
-     negativo devolve espaço para descendentes (g, p, ç) que o `overflow: hidden`
-     cortaria rente à baseline. */
+     negativo devolve espaço para descendentes (g, p, ç) que o
+     `overflow: hidden` cortaria rente à baseline. */
   .lume-line {
     display: block;
     overflow: hidden;
@@ -203,10 +371,10 @@
   }
 
   /* Palco do movimento ----------------------------------------------------
-     Quadrado, centralizado, e dimensionado pelo MENOR entre altura e largura —
-     assim ele nunca estoura a viewport nem em telas baixas nem em telas
-     estreitas. A partir de lg o palco encolhe em vw para abrir a coluna de
-     texto à esquerda em vez de disputar espaço com ela. */
+     Quadrado, centralizado, dimensionado pelo MENOR entre altura e largura —
+     nunca estoura a viewport, nem em telas baixas nem em telas estreitas. A
+     partir de lg o palco encolhe em vw para abrir a coluna de texto à esquerda
+     em vez de disputar espaço com ela. */
   .movement-stage {
     position: relative;
     width: min(56svh, 84vw);
@@ -215,25 +383,26 @@
 
   @media (min-width: 768px) {
     .movement-stage {
-      width: min(64svh, 62vw);
+      width: min(62svh, 60vw);
     }
   }
 
   @media (min-width: 1024px) {
     .movement-stage {
-      width: min(72svh, 48vw);
+      width: min(70svh, 46vw);
     }
   }
 
   /* As três camadas de cada peça, cada uma com uma responsabilidade:
 
-     .mv-place  posicionamento e escala base (CSS estático)
-     .mv-boom   afastamento controlado pelo scroll (GSAP: scale + opacity)
-     .mv-spin   rotação própria da peça (CSS infinito, ou GSAP no caso das
-                duas peças oscilantes)
+       .mv-place  posicionamento e escala base (CSS estático)
+       .mv-boom   afastamento controlado pelo scroll (GSAP: scale + opacity)
+       .mv-spin   rotação própria da peça (CSS infinito, ou GSAP nas duas
+                  peças oscilantes)
 
      Separar evita que a timeline de scroll sobrescreva a rotação contínua —
-     os dois efeitos escrevem `transform`, e num elemento só um mataria o outro. */
+     os dois efeitos escrevem `transform`, e num elemento só um mataria o
+     outro. */
   .mv-place,
   .mv-boom,
   .mv-spin {
@@ -247,12 +416,12 @@
       scale(var(--mv-s));
   }
 
-  .mv-boom {
+  /* `will-change` só enquanto o palco está em cena. Mantê-lo fixo em 34
+     elementos obrigaria o compositor a guardar 34 camadas durante a página
+     inteira; o data-attribute é ligado e desligado pelo ScrollTrigger. */
+  [data-stage-active="true"] .mv-boom,
+  [data-stage-active="true"] .mv-spin {
     will-change: transform, opacity;
-  }
-
-  .mv-spin {
-    will-change: transform;
   }
 
   .mv-spin[data-spin] {
@@ -260,4 +429,23 @@
     animation-direction: var(--mv-direction, normal);
   }
 
+  /* Régua de progresso das seções pinadas. Um fio de 1px que só existe
+     enquanto a seção está presa — dá ao usuário a noção de quanto falta, que
+     é o que costuma faltar num pin longo. */
+  .pin-progress {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: var(--color-line);
+  }
+
+  .pin-progress > span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    scale: 0 1;
+    background-color: var(--color-accent);
+  }
 }

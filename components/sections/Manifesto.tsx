@@ -3,13 +3,17 @@
 import { useRef } from "react";
 import { useSplitLines } from "@/hooks/useSplitLines";
 import { useReveal } from "@/hooks/useReveal";
+import { Container } from "@/components/ui/Container";
+import { SectionMark } from "@/components/ui/SectionMark";
 
 const TEXT =
   "Um relógio não mede o tempo. Ele o guarda. Cada LUME nasce de trezentas horas de trabalho silencioso — e de tudo aquilo que decidimos não acrescentar.";
 
 /**
- * Único ponto da página em que a paleta inverte: fundo bone, texto ink. A
- * troca funciona como uma respiração entre dois blocos escuros.
+ * Único ponto da página em que a paleta inverte. `data-theme="light"`
+ * redefine os tokens semânticos para os filhos, então nenhum elemento aqui
+ * precisa de cor explícita — `text-muted` já resolve para o tom que passa no
+ * AA sobre bone.
  */
 export function Manifesto() {
   const root = useRef<HTMLElement>(null);
@@ -22,32 +26,36 @@ export function Manifesto() {
     <section
       id="manifesto"
       ref={root}
-      aria-labelledby="manifesto-title"
-      className="bg-bone py-[18svh] text-ink gutter"
+      data-theme="light"
+      aria-labelledby="manifesto-label"
+      className="section-y-lg bg-canvas text-content"
     >
-      <div className="grid-12">
-        <h2
-          id="manifesto-title"
-          data-manifesto-meta
-          className="eyebrow col-span-12 text-graphite lg:col-span-2"
-        >
-          Manifesto
-        </h2>
+      <Container>
+        <div className="grid-12 gap-y-12">
+          <SectionMark
+            index="01"
+            label="Manifesto"
+            id="manifesto-label"
+            className="col-span-12 lg:col-span-3"
+          />
 
-        <p
-          ref={text}
-          className="col-span-12 mt-10 font-display text-display text-ink lg:col-span-10 lg:mt-0"
-        >
-          {TEXT}
-        </p>
+          <p
+            ref={text}
+            className="col-span-12 font-display text-display lg:col-span-9"
+          >
+            {TEXT}
+          </p>
 
-        <p
-          data-manifesto-meta
-          className="col-span-12 mt-16 text-body text-graphite lg:col-start-3 lg:col-span-4"
-        >
-          Atelier LUME · Genebra
-        </p>
-      </div>
+          <div className="col-span-12 flex flex-wrap items-baseline gap-x-10 gap-y-3 border-t border-line pt-8 lg:col-start-4 lg:col-span-9">
+            <p data-manifesto-meta className="eyebrow">
+              Atelier LUME · Genebra
+            </p>
+            <p data-manifesto-meta className="text-body text-muted">
+              Trezentas horas por peça. Doze pares de mãos.
+            </p>
+          </div>
+        </div>
+      </Container>
     </section>
   );
 }

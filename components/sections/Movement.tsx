@@ -9,6 +9,8 @@ import {
   type MovementLayer,
 } from "@/lib/movement";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { Container } from "@/components/ui/Container";
+import { SectionMark } from "@/components/ui/SectionMark";
 
 /**
  * `sizes` derivado da escala da própria camada.
@@ -74,6 +76,7 @@ export function Movement() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const copy = useRef<HTMLDivElement>(null);
+  const progress = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
@@ -132,6 +135,21 @@ export function Movement() {
               scrub: 1,
               anticipatePin: 1,
               invalidateOnRefresh: true,
+              /* `will-change` custa uma camada de composição por elemento.
+                 São 34 aqui — mantê-las durante a página inteira desperdiça
+                 memória de GPU, então o atributo só liga enquanto a seção
+                 está em cena. */
+              onToggle: (self) => {
+                stage.current?.setAttribute(
+                  "data-stage-active",
+                  String(self.isActive),
+                );
+              },
+              onUpdate: (self) => {
+                if (progress.current) {
+                  gsap.set(progress.current, { scaleX: self.progress });
+                }
+              },
             },
           });
 
@@ -194,13 +212,14 @@ export function Movement() {
     <section
       id="movimento"
       ref={root}
-      aria-labelledby="movimento-title"
-      className="relative isolate min-h-[100svh] overflow-hidden bg-ink"
+      aria-labelledby="movimento-label"
+      className="relative isolate min-h-[100svh] overflow-hidden bg-canvas"
     >
-      <div className="relative flex min-h-[100svh] items-center justify-center lg:justify-end lg:pr-[8vw]">
+      <div className="relative flex min-h-[100svh] items-center justify-center lg:justify-end lg:pr-[var(--edge)]">
         <div
           ref={stage}
           className="movement-stage"
+          data-stage-active="false"
           role="img"
           aria-label="Vista explodida do calibre LUME LM-38: o relógio se abre camada por camada, do cristal à platina, e volta a se montar."
         >
@@ -211,26 +230,29 @@ export function Movement() {
 
         <div
           ref={copy}
-          className="pointer-events-none absolute inset-0 flex items-start pt-[9svh] gutter lg:items-center lg:pt-0"
+          className="pointer-events-none absolute inset-0 flex items-start pt-[max(6rem,12svh)] lg:items-center lg:pt-0"
         >
           {/* No lg o palco é empurrado para a direita e esta coluna ocupa a
               faixa que sobra à esquerda — 34rem é a largura máxima que não
               encosta na caixa do relógio. */}
-          <div className="max-w-[42ch] lg:max-w-[34rem]">
-            <p className="eyebrow">Calibre LM-38</p>
-            <h2
-              id="movimento-title"
-              className="mt-6 font-display text-title text-bone"
-            >
-              Vinte e nove rubis. Quarenta e duas horas. Nenhum ruído.
-            </h2>
-            <p className="mt-6 text-body text-steel">
-              Dezessete peças, montadas e reguladas à mão em cinco posições.
-              Você nunca vai ver o calibre funcionando — e é exatamente esse o
-              ponto.
-            </p>
-          </div>
+          <Container>
+            <div className="max-w-[42ch] lg:max-w-[34rem]">
+              <SectionMark index="02" label="Movimento" id="movimento-label" />
+              <p className="mt-8 font-display text-title text-content">
+                Vinte e nove rubis. Quarenta e duas horas. Nenhum ruído.
+              </p>
+              <p className="mt-6 text-body text-muted">
+                Dezessete peças, montadas e reguladas à mão em cinco posições.
+                Você nunca vai ver o calibre funcionando — e é exatamente esse
+                o ponto.
+              </p>
+            </div>
+          </Container>
         </div>
+      </div>
+
+      <div className="pin-progress" aria-hidden="true">
+        <span ref={progress} />
       </div>
 
       {/* As camadas são decorativas para a AT (o palco já tem `role="img"` com

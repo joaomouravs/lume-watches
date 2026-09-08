@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { useParallax } from "@/hooks/useParallax";
 import { useReveal } from "@/hooks/useReveal";
 import { DETAIL_MACRO } from "@/lib/images";
+import { SectionMark } from "@/components/ui/SectionMark";
 
 const SPECS = [
   ["Diâmetro", "38,0 mm"],
@@ -41,11 +42,11 @@ export function Detail() {
     <section
       id="detalhe"
       ref={root}
-      aria-labelledby="detalhe-title"
-      className="bg-ink md:grid md:grid-cols-2 md:items-start"
+      aria-labelledby="detalhe-label"
+      className="bg-canvas md:grid md:grid-cols-2 md:items-start"
     >
       {/* No mobile o quadro tem a altura da própria placa. No desktop ele vira
-          uma coluna de 100svh e a placa fica centrada nela — o vão de ink em
+          uma coluna de 100svh e a placa fica centrada nela — o vão de canvas em
           cima e embaixo é o curso do parallax, e é o que permite mostrar o
           macro inteiro em vez de uma tira do meio. */}
       <div
@@ -70,30 +71,30 @@ export function Detail() {
         </div>
       </div>
 
-      <div className="px-[max(1.5rem,8vw)] py-[14svh] md:pl-[clamp(2.5rem,5vw,5rem)] md:pr-[max(1.5rem,8vw)]">
-        <p data-spec className="eyebrow">
-          Ficha técnica
-        </p>
-        <h2
-          id="detalhe-title"
-          data-spec
-          className="mt-8 font-display text-title text-bone"
-        >
-          Tudo que existe tem uma razão para existir.
-        </h2>
+      <div className="section-y gutter md:pl-[clamp(2.5rem,5vw,5rem)]">
+        <div className="max-w-[42rem]">
+          <SectionMark index="04" label="Detalhe" id="detalhe-label" />
 
-        <dl className="mt-14 border-t border-bone/10">
-          {SPECS.map(([label, value]) => (
-            <div
-              key={label}
-              data-spec
-              className="flex flex-col gap-1 border-b border-bone/10 py-5 sm:flex-row sm:items-baseline sm:gap-8"
-            >
-              <dt className="eyebrow sm:w-48 sm:shrink-0">{label}</dt>
-              <dd className="text-body text-bone/85">{value}</dd>
-            </div>
-          ))}
-        </dl>
+          <p
+            data-spec
+            className="mt-8 font-display text-title text-content"
+          >
+            Tudo que existe tem uma razão para existir.
+          </p>
+
+          <dl className="mt-14 border-t border-line">
+            {SPECS.map(([label, value]) => (
+              <div
+                key={label}
+                data-spec
+                className="flex flex-col gap-1 border-b border-line py-5 sm:flex-row sm:items-baseline sm:gap-8"
+              >
+                <dt className="eyebrow sm:w-48 sm:shrink-0">{label}</dt>
+                <dd className="text-body text-subtle">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
     </section>
   );

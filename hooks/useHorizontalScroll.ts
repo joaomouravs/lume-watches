@@ -3,6 +3,11 @@
 import { type RefObject } from "react";
 import { gsap, ScrollTrigger, useGSAP, MM } from "@/lib/gsap";
 
+type Options = {
+  /** Elemento cujo `scaleX` acompanha o progresso do pin. */
+  progressRef?: RefObject<HTMLElement | null>;
+};
+
 /**
  * Prende a seção na viewport e traduz o track no eixo X enquanto o usuário
  * rola no eixo Y.
@@ -20,6 +25,7 @@ import { gsap, ScrollTrigger, useGSAP, MM } from "@/lib/gsap";
 export function useHorizontalScroll(
   sectionRef: RefObject<HTMLElement | null>,
   trackRef: RefObject<HTMLElement | null>,
+  { progressRef }: Options = {},
 ) {
   useGSAP(
     () => {
@@ -43,13 +49,49 @@ export function useHorizontalScroll(
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              if (progressRef?.current) {
+                gsap.set(progressRef.current, { scaleX: self.progress });
+              }
+            },
           },
         });
 
+        /* Acessibilidade do pin: o track é TRANSLADADO, não rolado, então o
+           navegador não consegue trazer para a tela um card que recebeu foco
+           por Tab — o usuário de teclado ficaria digitando no escuro. Como o
+           deslocamento horizontal é 1:1 com o scroll vertical do pin, basta
+           somar a mesma quantidade de pixels ao scroll da página. */
+        const onFocusIn = (event: FocusEvent) => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
+
+          const trigger = tween.scrollTrigger;
+          if (!trigger) return;
+
+          const margin = 64;
+          const box = target.getBoundingClientRect();
+          let delta = 0;
+          if (box.right > window.innerWidth - margin) {
+            delta = box.right - (window.innerWidth - margin);
+          } else if (box.left < margin) {
+            delta = box.left - margin;
+          }
+          if (!delta) return;
+
+          window.scrollTo({ top: trigger.scroll() + delta });
+        };
+
+        track.addEventListener("focusin", onFocusIn);
+
         return () => {
+          track.removeEventListener("focusin", onFocusIn);
           tween.scrollTrigger?.kill();
           tween.kill();
           gsap.set(track, { clearProps: "x" });
+          if (progressRef?.current) {
+            gsap.set(progressRef.current, { clearProps: "scaleX" });
+          }
         };
       });
 

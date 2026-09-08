@@ -57,7 +57,7 @@ export function Lifestyle() {
       id="lifestyle"
       ref={root}
       aria-label="LUME em uso"
-      className="relative isolate h-[110svh] overflow-hidden bg-ink"
+      className="relative isolate h-[110svh] overflow-hidden bg-canvas"
     >
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <div ref={media} className="absolute inset-0">
@@ -71,14 +71,14 @@ export function Lifestyle() {
           />
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-ink/40"
+            className="absolute inset-0 bg-gradient-to-t from-canvas/85 via-canvas/25 to-canvas/45"
           />
         </div>
 
-        <div className="relative flex h-full items-end pb-[12svh] gutter">
+        <div className="container-lume relative flex h-full items-end pb-[12svh]">
           <blockquote
             ref={quote}
-            className="max-w-[22ch] font-display text-display text-bone"
+            className="max-w-[22ch] font-display text-display text-content"
           >
             Quem sabe as horas não precisa mostrá-las.
           </blockquote>

@@ -1,5 +1,5 @@
 import { getImageProps } from "next/image";
-import { HeroContent } from "@/components/sections/HeroContent";
+import { HeroShell } from "@/components/sections/HeroShell";
 import { HERO_DESKTOP, HERO_MOBILE } from "@/lib/images";
 
 /**
@@ -48,19 +48,5 @@ function HeroMedia() {
 }
 
 export function Hero() {
-  return (
-    <section
-      id="hero"
-      aria-label="LUME — Time, quietly."
-      className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-ink"
-    >
-      <HeroMedia />
-      {/* Véu que garante contraste AA do texto sobre a fotografia. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/45 to-ink/90"
-      />
-      <HeroContent />
-    </section>
-  );
+  return <HeroShell media={<HeroMedia />} />;
 }

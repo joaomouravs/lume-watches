@@ -43,23 +43,30 @@ npm run lint     # ESLint (next/core-web-vitals + typescript)
 app/
   layout.tsx           fontes, metadata/OG, skip link, shell
   page.tsx             composição das seções
-  globals.css          design system, palco do movimento, utilitários
+  globals.css          design system completo
+  robots.ts · sitemap.ts
 components/
-  SiteShell.tsx        contexto "ready" + smooth scroll + loader
+  SiteShell.tsx        contexto (ready, trava de scroll, scrollTo) + loader + header
+  Header.tsx           barra fixa, scroll spy, estados de scroll
+  MobileMenu.tsx       menu fullscreen com foco preso e trava de scroll
   Loader.tsx
-  sections/            Hero · Manifesto · Movement · Collection · Detail
-                       Lifestyle · Footer
+  StructuredData.tsx   JSON-LD: Brand, WebSite e os 3 Product
+  ui/                  Container · Eyebrow · Button · SectionMark
+  sections/            Hero (+ HeroShell) · Manifesto · Movement · Collection
+                       Detail · Lifestyle · Footer
 hooks/
-  useSmoothScroll.ts   Lenis dirigido pelo ticker do GSAP
+  useSmoothScroll.ts   Lenis no ticker do GSAP + scrollTo programático
+  useScrollSpy.ts      seção corrente para o aria-current do header
   useSplitLines.ts     SplitText manual + reveal linha a linha
-  useHorizontalScroll.ts  pin + translate X da coleção
-  useParallax.ts
-  useReveal.ts
+  useHorizontalScroll.ts  pin + translate X + progresso + foco por teclado
+  useParallax.ts · useReveal.ts · useMagnetic.ts
 data/
   watches.ts           catálogo dos 3 modelos (sem caminhos de imagem)
 lib/
   images.ts            TODOS os caminhos de imagem, em constantes
   movement.ts          geometria e movimento das 17 camadas do calibre
+  nav.ts               navegação e contato: fonte única de header, menu e rodapé
+  site.ts              url, nome e descrição: fonte única de metadata e JSON-LD
   gsap.ts              plugins, easing "lume", condições de matchMedia
 scripts/
   prepare-movement-layers.mjs
@@ -128,24 +135,100 @@ Sem isso as agulhas orbitariam o centro do mostrador em vez de pivotar nele.
 
 ## Design system
 
+### Cor — tokens semânticos, não literais
+
+A paleta tem cinco cores, mas nenhum componente usa `bg-ink` ou `text-bone/85`.
+Todos usam a camada semântica:
+
 ```
---ink    #0B0B0C   fundo principal
---bone   #EDE9E3   texto/fundo claro
---steel  #8A8A8F   texto secundário
---brass  #B8A582   acento (uso mínimo: preços e um link)
+--color-canvas         fundo da seção
+--color-surface        superfície elevada (fundo de imagem carregando)
+--color-content        texto principal
+--color-muted          texto secundário
+--color-subtle         texto terciário
+--color-line           divisórias
+--color-line-strong    divisórias com peso
+--color-accent         latão: preços, foco, estados ativos
 ```
 
-Há um quinto token, `--graphite (#5B5B60)`: sobre `--bone`, o `--steel` puro
-fica em 2.8:1 e reprova no AA. O graphite mantém a mesma família em 5.6:1 e é
-usado apenas nos eyebrows da seção clara.
+O Manifesto é a única seção clara, e é só `data-theme="light"` no `<section>`:
+os mesmos tokens são redefinidos para os filhos, e o `text-muted` que dava
+5.7:1 sobre ink passa a dar 5.6:1 sobre bone sem que componente nenhum saiba
+disso. Antes o mesmo problema era resolvido com um token especial
+(`--graphite`) aplicado à mão em cada elemento da seção.
 
-- **Display** — Instrument Serif 400, `tracking -0.02em`, escala em `clamp()`.
-- **Corpo** — Geist Sans 400.
-- **Eyebrow** — Geist Sans 11px, uppercase, `tracking 0.25em`, `--steel`.
-- **Grid** — 12 colunas (`.grid-12`), margens `max(1.5rem, 8vw)` (`.gutter`).
-- **Transições** — `cubic-bezier(0.16, 1, 0.3, 1)`, 0.8s–1.2s. Sem bounce.
-  A curva está registrada no GSAP como o easing `"lume"`, então CSS e JS usam
-  exatamente a mesma aceleração.
+### Tipografia — oito degraus, e quase nada fora deles
+
+`mark` · `mark-sm` · `display` · `title` · `subtitle` · `lead` · `body` ·
+`caption`, todos em `clamp()`. Os cinco `text-[clamp(…)]` avulsos que existiam
+nos cards e no rodapé viraram `subtitle` e `mark-sm`. Sobram dois, ambos
+deliberados e de uso único: o wordmark do loader e os links do menu mobile,
+que escalam com a viewport por decisão de composição.
+
+### Layout — container com teto
+
+```
+--gutter       clamp(1.5rem, 7vw, 8rem)
+--content-max  88rem
+--edge         max(gutter, (100% − content-max) / 2)
+```
+
+`.container-lume` trava a coluna de conteúdo: sem o teto, um monitor de 2560px
+abria uma linha de texto de 2150px. `--edge` é a mesma distância da borda,
+exposta para as seções full-bleed (a galeria horizontal, o palco do movimento)
+encostarem na linha vertical do resto da página em vez de na margem bruta. É
+`%` e não `vw` porque `vw` inclui a barra de rolagem.
+
+Ritmo vertical: `section-y` e `section-y-lg`. Sem `py-[18svh]` avulso.
+
+### z-index nomeado
+
+`z-content` (10) · `z-sticky` (20) · `z-header` (50) · `z-overlay` (80) ·
+`z-loader` (90) · skip link (100). Ninguém precisa adivinhar se 40 fica acima
+de 50.
+
+### Movimento
+
+`cubic-bezier(0.16, 1, 0.3, 1)` registrada no GSAP como o easing `"lume"`,
+então CSS e JS produzem exatamente a mesma aceleração. Durações na escala do
+Tailwind (500/700/1000ms) — sem `duration-[830ms]`.
+
+### Primitivas
+
+`Container` · `Eyebrow` · `Button` (solid/outline/ghost, magnético opcional,
+44px de alvo) · `SectionMark`. Nada de abstração por abstração: são os quatro
+padrões que realmente se repetem.
+
+O `SectionMark` — número, fio e rótulo — aparece nas quatro seções internas e é
+o que faz a página ler como um documento em vez de componentes empilhados. A
+animação vive dentro dele, não nas seções, para que o gesto seja idêntico nas
+quatro ocorrências sem depender de ninguém lembrar de chamar um hook.
+
+## Header e menu mobile
+
+Antes não existia navegação nenhuma acima do rodapé.
+
+**Barra fixa com dois estados.** `data-scrolled` liga fundo e borda ao sair do
+topo; `data-hidden` recolhe a barra na descida e devolve na subida. O critério
+é **velocidade**, não direção: com `direction` a barra piscaria a cada
+micro-oscilação do trackpad e, pior, dentro das seções pinadas, onde o scrub
+inverte o sinal o tempo todo.
+
+Os dois estados são atributos numa classe `.site-header`, não utilitários — e
+isso foi uma descoberta de depuração: ao assumir transforms, o GSAP escreve
+`translate: none` inline, o que anulava o `-translate-y-full` da barra. A
+animação de entrada foi movida para o elemento interno e o `<header>` ficou com
+a propriedade `translate` só para si.
+
+**Scroll spy** por `IntersectionObserver` numa faixa estreita logo abaixo do
+header — e não por área visível. Com o Movimento ocupando 300vh de pin, o
+critério de área o elegeria como seção corrente quase o tempo todo.
+
+**Menu mobile** em tela cheia: cortina em `clip-path`, links subindo por baixo
+de uma máscara (direções opostas, para ler como duas camadas), foco preso com
+Tab circular, Esc para fechar, foco devolvido ao botão que abriu, e trava de
+scroll que funciona também para quem tem movimento reduzido — nesse caso o
+Lenis nem é instanciado, então a trava vai num atributo no `<html>`.
 
 ## A seção Movimento
 
@@ -226,8 +309,23 @@ escolher a imagem do srcset. Sem corrigir, a roda de 12 dentes renderizada com
   `gallery` (≥768px de largura, ≥640px de altura e movimento permitido); o CSS e
   o `matchMedia` do GSAP usam literalmente a mesma condição, senão o CSS
   recortaria a seção sem o pin existir e dois modelos ficariam inalcançáveis.
+- **Coleção acessível por teclado.** O track é *transladado*, não rolado, então
+  o navegador não consegue trazer para a tela um card que recebeu foco por Tab —
+  o usuário de teclado ficaria digitando no escuro. Como o deslocamento
+  horizontal é 1:1 com o scroll vertical do pin, um listener de `focusin` soma a
+  mesma quantidade de pixels ao scroll da página. Cada card também ganhou um
+  destino real (`Consultar`, com assunto pré-preenchido) e estados de hover e
+  foco — antes eram blocos decorativos sem ação.
+- **Progresso nos pins.** Um fio de 1px no rodapé das duas seções pinadas
+  acompanha `self.progress`. Num pin de 300vh o usuário não tem como saber
+  quanto falta, e sem esse sinal a seção parece travada em vez de longa.
 - **Lifestyle.** O reveal é por `clip-path`, não por escala: a imagem não se
   move, quem se move é a janela por onde ela aparece.
+- **Parallax de cursor no Hero.** 24px de curso na fotografia, via `quickTo`
+  (um tween reaproveitado, nada alocado por movimento do mouse), só em
+  `pointer: fine`. E o botão magnético escuta `pointermove` no documento, não
+  `mouseenter` no elemento: a atração começa antes do cursor tocar o botão, que
+  é o que dá sensação de ímã em vez de um salto no hover.
 - **Classes de componente em `@layer components`.** CSS sem camada vence
   *qualquer* utilitário do Tailwind, independente de especificidade. Enquanto
   `.parallax-frame` esteve fora de layer, o `position: relative` dela anulava o
@@ -246,8 +344,25 @@ escolher a imagem do srcset. Sem corrigir, a roda de 12 dentes renderizada com
   link, foco visível em `--brass`, contraste AA em todas as combinações. O palco
   do movimento é um `role="img"` com descrição, e as 17 peças aparecem como
   lista `sr-only`.
+- Alvos de toque de 44px em todo link e botão, via um utilitário `tap-target`
+  que cresce a área por pseudo-elemento — o texto mantém o line-height do
+  design, e nada no layout se move.
 - GSAP só dentro de `useGSAP` — nada roda no SSR, zero erros de hidratação.
 - `next/image` em tudo, AVIF antes de WebP; hero com `priority`, o resto lazy.
+- `will-change` das 34 camadas do calibre é ligado e desligado pelo próprio
+  ScrollTrigger (`onToggle`). Fixo, seriam 34 camadas de composição retidas
+  durante a página inteira.
+- **Sem `overflow-x: hidden` global.** Ele existia e mascarava estouro
+  horizontal em vez de corrigi-lo. Foi removido, e a página foi medida em 15
+  larguras — de 320px a 2560px — com zero overflow em todas.
+
+## SEO
+
+`title`, `description`, canonical, Open Graph e Twitter card em `app/layout.tsx`,
+todos alimentados por `lib/site.ts`. Somam-se agora `robots.ts`, `sitemap.ts` e
+JSON-LD (`Brand`, `WebSite` e um `Product` por referência) — os preços do
+structured data vêm do mesmo `data/watches.ts` que a página renderiza, então
+marcação e conteúdo visível não podem divergir.
 
 ## Licença
 

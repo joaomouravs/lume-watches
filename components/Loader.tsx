@@ -63,13 +63,13 @@ export function Loader({ onComplete }: { onComplete: () => void }) {
       ref={root}
       id="loader"
       aria-hidden="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink"
+      className="fixed inset-0 z-loader flex items-center justify-center bg-canvas"
     >
       {/* O tracking anima a partir do centro; o padding-left compensa o espaço
           que a última letra carrega à direita e mantém o bloco óptico centrado. */}
       <span
         ref={mark}
-        className="pl-[0.5em] font-display text-[clamp(2rem,7vw,4.5rem)] text-bone opacity-0"
+        className="pl-[0.5em] font-display text-[clamp(2rem,7vw,4.5rem)] text-content opacity-0"
         style={{ letterSpacing: "0.5em" }}
       >
         LUME
