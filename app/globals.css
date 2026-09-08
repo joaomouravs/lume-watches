@@ -1,26 +1,252 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* A galeria horizontal só existe quando (a) há largura, (b) há altura para o
+   card inteiro caber na viewport e (c) o usuário aceita movimento. Fora disso
+   ela volta a ser uma pilha vertical. Esta condição é literalmente a mesma de
+   MM.gallery no lib/gsap.ts: se o CSS recortasse a seção sem o pin existir,
+   dois dos três modelos ficariam inalcançáveis. */
+@custom-variant gallery (@media (min-width: 768px) and (min-height: 640px) and (prefers-reduced-motion: no-preference));
+
+/* =========================================================================
+   LUME · design system
+   ========================================================================= */
+
+@theme {
+  /* Paleta ------------------------------------------------------------- */
+  --color-ink: #0b0b0c;
+  --color-bone: #ede9e3;
+  --color-steel: #8a8a8f;
+  --color-brass: #b8a582;
+  /* Variante escura do steel: sobre --bone o steel puro fica em 2.8:1 e
+     reprova no AA. Este tom mantém a mesma família e entrega 5.6:1. */
+  --color-graphite: #5b5b60;
+
+  /* Tipografia --------------------------------------------------------- */
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Escala fluida: clamp() em todos os degraus, sem breakpoints no texto. */
+  --text-wordmark: clamp(4.5rem, 21vw, 20rem);
+  --text-wordmark--line-height: 0.8;
+  --text-wordmark--letter-spacing: -0.02em;
+
+  --text-display: clamp(2.75rem, 7vw, 6.5rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-title: clamp(2rem, 4.4vw, 3.75rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.02em;
+
+  --text-lead: clamp(1.125rem, 1.6vw, 1.5rem);
+  --text-lead--line-height: 1.5;
+
+  --text-body: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  --text-body--line-height: 1.65;
+
+  /* Movimento ---------------------------------------------------------- */
+  --ease-lume: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Utilitários ------------------------------------------------------------ */
+
+/* Margem lateral: 1.5rem no mobile, mínimo de 8vw a partir do momento em que
+   8vw ultrapassa esse valor. Uma expressão só, sem media query. */
+@utility gutter {
+  padding-inline: max(1.5rem, 8vw);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@utility grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(1rem, 1.6vw, 2rem);
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--color-steel);
+}
+
+/* Base ------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    background-color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 4px;
+    border-radius: 1px;
+  }
+
+  /* Lenis */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Rotação contínua das peças do calibre ------------------------------------
+   Em CSS e não em JS: é composta na GPU, não custa frame de main thread e
+   desliga sozinha em prefers-reduced-motion, sem depender do bundle. */
+@keyframes lume-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Acessibilidade --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-spin {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  margin: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-bone);
+  color: var(--color-ink);
+  transform: translateY(-150%);
+  transition: transform 0.4s var(--ease-lume);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* SplitText manual -------------------------------------------------------
+   Os wrappers são criados por hooks/useSplitLines.ts. O par padding/margin
+   negativo devolve espaço para descendentes (g, p, ç) que o `overflow: hidden`
+   cortaria rente à baseline. */
+.lume-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.lume-line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.lume-word {
+  display: inline-block;
+}
+
+/* Mídia com parallax ----------------------------------------------------
+   A imagem é maior que o contêiner para que o deslocamento nunca exponha uma
+   faixa vazia nas bordas. 118% é o mínimo que cobre o curso de ±5,9% usado
+   pelo hook — sobra qualquer coisa acima disso só amplia o corte da foto. */
+.parallax-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.parallax-media {
+  position: absolute;
+  inset: -9% 0;
+  height: 118%;
+  width: 100%;
+  will-change: transform;
+}
+
+/* Palco do movimento ----------------------------------------------------
+   Quadrado, centralizado, e dimensionado pelo MENOR entre altura e largura —
+   assim ele nunca estoura a viewport nem em telas baixas nem em telas
+   estreitas. A partir de lg o palco encolhe em vw para abrir a coluna de
+   texto à esquerda em vez de disputar espaço com ela. */
+.movement-stage {
+  position: relative;
+  width: min(56svh, 84vw);
+  aspect-ratio: 1;
+}
+
+@media (min-width: 768px) {
+  .movement-stage {
+    width: min(64svh, 62vw);
+  }
+}
+
+@media (min-width: 1024px) {
+  .movement-stage {
+    width: min(72svh, 48vw);
+  }
+}
+
+/* As três camadas de cada peça, cada uma com uma responsabilidade:
+
+   .mv-place  posicionamento e escala base (CSS estático)
+   .mv-boom   afastamento controlado pelo scroll (GSAP: scale + opacity)
+   .mv-spin   rotação própria da peça (CSS infinito, ou GSAP no caso das
+              duas peças oscilantes)
+
+   Separar evita que a timeline de scroll sobrescreva a rotação contínua —
+   os dois efeitos escrevem `transform`, e num elemento só um mataria o outro. */
+.mv-place,
+.mv-boom,
+.mv-spin {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+}
+
+.mv-place {
+  transform: translate(calc(var(--mv-x) * 100%), calc(var(--mv-y) * 100%))
+    scale(var(--mv-s));
+}
+
+.mv-boom {
+  will-change: transform, opacity;
+}
+
+.mv-spin {
+  will-change: transform;
+}
+
+.mv-spin[data-spin] {
+  animation: lume-rotate var(--mv-duration) linear infinite;
+  animation-direction: var(--mv-direction, normal);
 }
