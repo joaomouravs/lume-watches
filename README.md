@@ -1,9 +1,15 @@
 # LUME
 
-Site institucional de página única para **LUME**, uma marca fictícia de relógios
-de luxo minimalista. Projeto de portfólio front-end.
+**English** · [Português](README.pt-BR.md)
+
+A single-page brand site for **LUME**, a fictional minimalist luxury watch brand.
+A front-end portfolio project.
 
 > Time, quietly.
+
+**Live:** https://lume-psi-three.vercel.app
+
+![LUME site hero](public/og.jpg)
 
 ---
 
@@ -12,160 +18,162 @@ de luxo minimalista. Projeto de portfólio front-end.
 | | |
 |---|---|
 | Framework | Next.js 15 (App Router) + TypeScript |
-| Estilo | Tailwind CSS v4 (sem biblioteca de componentes) |
-| Animação | GSAP 3 + ScrollTrigger, `@gsap/react` |
+| Styling | Tailwind CSS v4 (no component library) |
+| Animation | GSAP 3 + ScrollTrigger, `@gsap/react` |
 | Smooth scroll | Lenis |
-| Fontes | `next/font` — Instrument Serif (display) e Geist Sans (corpo) |
-| Pipeline de imagem | sharp (script de build, não runtime) |
+| Fonts | `next/font`: Instrument Serif (display) and Geist Sans (body) |
+| Image pipeline | sharp (a build script, not a runtime dependency) |
 
-Nada de shadcn, MUI ou headless kits: todo componente é escrito do zero.
+No shadcn, MUI or headless kits: every component is written from scratch.
 
 ## Setup
 
+Requires Node.js 20.9 or newer (sharp needs it).
+
 ```bash
 npm install
-npm run layers   # gera /public/movimento e /public/og.jpg a partir dos originais
 npm run dev      # http://localhost:3000
 ```
 
-`npm run layers` precisa rodar uma vez antes do primeiro `dev`/`build`, e de novo
-sempre que algum arquivo de `/public/Engrenagens` mudar.
+The derived files (`/public/movimento` and `/public/og.jpg`) are committed, so the
+Vercel build does not depend on the script. Run `npm run layers` again only when a file
+in `/public/Engrenagens` or the hero changes.
 
 ```bash
-npm run build    # build de produção
-npm run start    # serve o build
+npm run build    # production build
+npm run start    # serve the build
 npm run lint     # ESLint (next/core-web-vitals + typescript)
 ```
 
-## Estrutura
+## Structure
 
 ```
 app/
-  layout.tsx           fontes, metadata/OG, skip link, shell
-  page.tsx             composição das seções
-  globals.css          design system completo
+  layout.tsx           fonts, metadata/OG, skip link, shell
+  page.tsx             section composition
+  globals.css          the whole design system
   robots.ts · sitemap.ts
 components/
-  SiteShell.tsx        contexto (ready, trava de scroll, scrollTo) + loader + header
-  Header.tsx           barra fixa, scroll spy, estados de scroll
-  MobileMenu.tsx       menu fullscreen com foco preso e trava de scroll
+  SiteShell.tsx        context (ready, scroll lock, scrollTo) + loader + header
+  Header.tsx           fixed bar, scroll spy, scroll states
+  MobileMenu.tsx       fullscreen menu with focus trap and scroll lock
   Loader.tsx
-  StructuredData.tsx   JSON-LD: Brand, WebSite e os 3 Product
+  StructuredData.tsx   JSON-LD: Brand, WebSite and the 3 Products
   ui/                  Container · Eyebrow · Button · SectionMark
   sections/            Hero (+ HeroShell) · Manifesto · Movement · Collection
                        Detail · Lifestyle · Footer
 hooks/
-  useSmoothScroll.ts   Lenis no ticker do GSAP + scrollTo programático
-  useScrollSpy.ts      seção corrente para o aria-current do header
-  useSplitLines.ts     SplitText manual + reveal linha a linha
-  useHorizontalScroll.ts  pin + translate X + progresso + foco por teclado
+  useSmoothScroll.ts   Lenis on the GSAP ticker + programmatic scrollTo
+  useScrollSpy.ts      current section for the header's aria-current
+  useSplitLines.ts     hand-rolled SplitText + line-by-line reveal
+  useHorizontalScroll.ts  pin + translate X + progress + keyboard focus
   useParallax.ts · useReveal.ts · useMagnetic.ts
 data/
-  watches.ts           catálogo dos 3 modelos (sem caminhos de imagem)
+  watches.ts           catalog of the 3 models (no image paths)
 lib/
-  images.ts            TODOS os caminhos de imagem, em constantes
-  movement.ts          geometria e movimento das 17 camadas do calibre
-  nav.ts               navegação e contato: fonte única de header, menu e rodapé
-  site.ts              url, nome e descrição: fonte única de metadata e JSON-LD
-  gsap.ts              plugins, easing "lume", condições de matchMedia
+  images.ts            EVERY image path, as constants
+  movement.ts          geometry and motion of the movement's 17 layers
+  nav.ts               navigation and contact: single source for header, menu and footer
+  site.ts              url, name and description: single source for metadata and JSON-LD
+  gsap.ts              plugins, the "lume" easing, matchMedia conditions
 scripts/
   prepare-movement-layers.mjs
 ```
 
-## Imagens
+## Images
 
-Nenhum componente monta string de caminho: tudo passa por `lib/images.ts`.
+No component builds a path string: everything goes through `lib/images.ts`.
 
-### Originais (entregues, não modificados)
+### Originals (as delivered, unmodified)
 
-| Pasta | Arquivo | Dimensões | Uso |
+| Folder | File | Size | Used for |
 |---|---|---|---|
 | `/hero` | `hero-desktop.png` | 1672×941 | Hero, desktop |
 | `/hero` | `hero-mobile.png` | 941×1672 | Hero, mobile |
 | `/vitrini` | `vitrini 3.png` | 1086×1448 | **LUME 01 · Bone** |
 | `/vitrini` | `vitrini 2.png` | 1086×1448 | **LUME 02 · Slate** |
 | `/vitrini` | `vitrini.png` | 1086×1448 | **LUME 03 · Brass** |
-| `/foto-relogio` | `macro.png` | 1672×941 | Detalhe (split screen) |
-| `/foto-relogio` | `relogio paisagem.png` | 1536×1024 | não usada |
-| `/foto-relogio` | `watch.png` | 1122×1402 | não usada |
-| `/lifestyle` | `lifestyle.png` | 1086×1448 | Lifestyle (full-bleed) |
-| `/lifestyle` | `lifestyle braço.png` | 1122×1402 | não usada |
-| `/Engrenagens` | 17 PNGs | 1254×1254 | origem das camadas do movimento |
+| `/foto-relogio` | `macro.png` | 1672×941 | Detail (split screen) |
+| `/foto-relogio` | `relogio paisagem.png` | 1536×1024 | unused |
+| `/foto-relogio` | `watch.png` | 1122×1402 | unused |
+| `/lifestyle` | `lifestyle.png` | 1086×1448 | Lifestyle (full bleed) |
+| `/lifestyle` | `lifestyle braço.png` | 1122×1402 | unused |
+| `/Engrenagens` | 17 PNGs | 1254×1254 | source of the movement layers |
 
-> **A vitrine não segue a ordem dos nomes.** Conferido imagem por imagem contra
-> a descrição de cada modelo: `vitrini.png` é a Brass (latão + couro cognac),
-> `vitrini 2.png` é a Slate (mostrador cinza + bracelete de aço) e
-> `vitrini 3.png` é a Bone (mostrador off-white + couro preto). Associar por
-> ordem alfabética trocaria a Bone pela Brass.
+> **The showcase does not follow the file names.** Checked image by image against each
+> model's description: `vitrini.png` is the Brass (brass + cognac leather),
+> `vitrini 2.png` is the Slate (grey dial + steel bracelet) and `vitrini 3.png` is the
+> Bone (off-white dial + black leather). Matching them alphabetically would swap the Bone
+> and the Brass.
 
-### Derivados (gerados por `npm run layers`)
+### Derived (generated by `npm run layers`)
 
-| Saída | Origem |
+| Output | Source |
 |---|---|
 | `/movimento/01-mainplate.png` … `/movimento/17-crystal.png` | `/Engrenagens/*` |
 | `/og.jpg` (1200×630) | `/hero/hero-desktop.png` |
 
-## Por que as camadas do movimento são derivadas
+## Why the movement layers are derived
 
-Os 17 PNGs de `/Engrenagens` **não têm canal alfa** — foram renderizados sobre
-fundo preto (`channels: 3`, cantos em `(0,0,0)`). Empilhados com
-`position: absolute; inset: 0`, cada camada seria um quadrado opaco cobrindo
-tudo abaixo dela: só o cristal apareceria.
+The 17 PNGs in `/Engrenagens` **have no alpha channel**: they were rendered on a black
+background (`channels: 3`, corners at `(0,0,0)`). Stacked with
+`position: absolute; inset: 0`, each layer would be an opaque square covering everything
+beneath it, and only the crystal would show.
 
-`scripts/prepare-movement-layers.mjs` resolve isso em duas etapas.
+`scripts/prepare-movement-layers.mjs` fixes this in two steps.
 
-**1. Alfa derivado da luminância.** O preto do fundo vira transparente e a peça
-continua opaca. O RGB é preservado como está — nada de *unpremultiply*: as peças
-não são renders com alfa embutido, são imagens onde escuro significa material
-escuro, e dividir o RGB pelo alfa clarearia todas as sombras. Efeito colateral
-desejável: furos, vazados e os espaços entre os raios também são pretos, e viram
-transparentes — exatamente o que uma vista explodida empilhada precisa.
+**1. Alpha derived from luminance.** The black background becomes transparent and the
+part stays opaque. RGB is kept as is, with no *unpremultiply*: the parts are not renders
+with baked-in alpha, they are images where dark means dark material, and dividing RGB by
+alpha would brighten every shadow. A welcome side effect: holes, cutouts and the gaps
+between spokes are black too, so they become transparent, which is exactly what a stacked
+exploded view needs.
 
-**2. Recentragem no eixo de rotação.** `transform-origin: center center` gira em
-torno do centro do arquivo, e em várias peças o eixo não está lá. A imagem é
-recolada num canvas maior, centrada no pivô, com três estratégias:
+**2. Recentering on the rotation axis.** `transform-origin: center center` rotates around
+the center of the file, and on several parts the axis is not there. The image is pasted
+onto a larger canvas, centered on the pivot, using one of three strategies:
 
-| Estratégia | Peças | Como acha o eixo |
+| Strategy | Parts | How it finds the axis |
 |---|---|---|
-| `bbox` | barrilete, 4 engrenagens, roda de escape, balanço | centro da caixa delimitadora (peças redondas) |
-| `widest` | as 3 agulhas | a linha mais larga é o anel de fixação (hora y≈915, minuto y≈1020, segundos y≈809) |
-| `jewel` | rotor, âncora | centroide dos pixels dourados, que é a bucha/rubi (rotor y≈463, âncora y≈536) |
+| `bbox` | barrel, 4 gears, escape wheel, balance | center of the bounding box (round parts) |
+| `widest` | the 3 hands | the widest row is the mounting ring (hour y≈915, minute y≈1020, seconds y≈809) |
+| `jewel` | rotor, pallet fork | centroid of the gold pixels, which is the bushing/jewel (rotor y≈463, pallet fork y≈536) |
 
-Sem isso as agulhas orbitariam o centro do mostrador em vez de pivotar nele.
+Without this the hands would orbit the center of the dial instead of pivoting on it.
 
 ## Design system
 
-### Cor — tokens semânticos, não literais
+### Color: semantic tokens, not literals
 
-A paleta tem cinco cores, mas nenhum componente usa `bg-ink` ou `text-bone/85`.
-Todos usam a camada semântica:
+The palette has five colors, but no component uses `bg-ink` or `text-bone/85`. They all
+use the semantic layer:
 
 ```
---color-canvas         fundo da seção
---color-surface        superfície elevada (fundo de imagem carregando)
---color-content        texto principal
---color-muted          texto secundário
---color-subtle         texto terciário
---color-line           divisórias
---color-line-strong    divisórias com peso
---color-accent         latão: preços, foco, estados ativos
+--color-canvas         section background
+--color-surface        raised surface (background of a loading image)
+--color-content        primary text
+--color-muted          secondary text
+--color-subtle         tertiary text
+--color-line           dividers
+--color-line-strong    heavier dividers
+--color-accent         brass: prices, focus, active states
 ```
 
-O Manifesto é a única seção clara, e é só `data-theme="light"` no `<section>`:
-os mesmos tokens são redefinidos para os filhos, e o `text-muted` que dava
-5.7:1 sobre ink passa a dar 5.6:1 sobre bone sem que componente nenhum saiba
-disso. Antes o mesmo problema era resolvido com um token especial
-(`--graphite`) aplicado à mão em cada elemento da seção.
+The Manifesto is the only light section, and it is just `data-theme="light"` on the
+`<section>`: the same tokens are redefined for its children, and the `text-muted` that
+gave 5.7:1 on ink now gives 5.6:1 on bone without any component knowing about it. Before,
+the same problem was solved with a special token (`--graphite`) applied by hand to every
+element in the section.
 
-### Tipografia — oito degraus, e quase nada fora deles
+### Typography: eight steps, and almost nothing outside them
 
-`mark` · `mark-sm` · `display` · `title` · `subtitle` · `lead` · `body` ·
-`caption`, todos em `clamp()`. Os cinco `text-[clamp(…)]` avulsos que existiam
-nos cards e no rodapé viraram `subtitle` e `mark-sm`. Sobram dois, ambos
-deliberados e de uso único: o wordmark do loader e os links do menu mobile,
-que escalam com a viewport por decisão de composição.
+`mark` · `mark-sm` · `display` · `title` · `subtitle` · `lead` · `body` · `caption`, all
+using `clamp()`. The five one-off `text-[clamp(…)]` values that existed in the cards and
+the footer became `subtitle` and `mark-sm`. Two remain, both deliberate and used once: the
+loader wordmark and the mobile menu links, which scale with the viewport as a composition
+decision.
 
-### Layout — container com teto
+### Layout: a container with a ceiling
 
 ```
 --gutter       clamp(1.5rem, 7vw, 8rem)
@@ -173,197 +181,196 @@ que escalam com a viewport por decisão de composição.
 --edge         max(gutter, (100% − content-max) / 2)
 ```
 
-`.container-lume` trava a coluna de conteúdo: sem o teto, um monitor de 2560px
-abria uma linha de texto de 2150px. `--edge` é a mesma distância da borda,
-exposta para as seções full-bleed (a galeria horizontal, o palco do movimento)
-encostarem na linha vertical do resto da página em vez de na margem bruta. É
-`%` e não `vw` porque `vw` inclui a barra de rolagem.
+`.container-lume` caps the content column: without the ceiling, a 2560px monitor opened a
+2150px line of text. `--edge` is the same distance from the edge, exposed so the full-bleed
+sections (the horizontal gallery, the movement stage) line up with the vertical line of the
+rest of the page instead of the raw margin. It uses `%` and not `vw` because `vw` includes
+the scrollbar.
 
-Ritmo vertical: `section-y` e `section-y-lg`. Sem `py-[18svh]` avulso.
+Vertical rhythm: `section-y` and `section-y-lg`. No one-off `py-[18svh]`.
 
-### z-index nomeado
+### Named z-index
 
-`z-content` (10) · `z-sticky` (20) · `z-header` (50) · `z-overlay` (80) ·
-`z-loader` (90) · skip link (100). Ninguém precisa adivinhar se 40 fica acima
-de 50.
+`z-content` (10) · `z-sticky` (20) · `z-header` (50) · `z-overlay` (80) · `z-loader` (90)
+· skip link (100). Nobody has to guess whether 40 sits above 50.
 
-### Movimento
+### Motion
 
-`cubic-bezier(0.16, 1, 0.3, 1)` registrada no GSAP como o easing `"lume"`,
-então CSS e JS produzem exatamente a mesma aceleração. Durações na escala do
-Tailwind (500/700/1000ms) — sem `duration-[830ms]`.
+`cubic-bezier(0.16, 1, 0.3, 1)` is registered in GSAP as the `"lume"` easing, so CSS and
+JS produce exactly the same acceleration. Durations follow the Tailwind scale
+(500/700/1000ms), with no `duration-[830ms]`.
 
-### Primitivas
+### Primitives
 
-`Container` · `Eyebrow` · `Button` (solid/outline/ghost, magnético opcional,
-44px de alvo) · `SectionMark`. Nada de abstração por abstração: são os quatro
-padrões que realmente se repetem.
+`Container` · `Eyebrow` · `Button` (solid/outline/ghost, optionally magnetic, 44px target)
+· `SectionMark`. No abstraction for its own sake: these are the four patterns that really
+repeat.
 
-O `SectionMark` — número, fio e rótulo — aparece nas quatro seções internas e é
-o que faz a página ler como um documento em vez de componentes empilhados. A
-animação vive dentro dele, não nas seções, para que o gesto seja idêntico nas
-quatro ocorrências sem depender de ninguém lembrar de chamar um hook.
+The `SectionMark` (number, rule and label) appears in the four inner sections, and it is
+what makes the page read as a document instead of stacked components. The animation lives
+inside it, not in the sections, so the gesture is identical in all four places without
+anyone having to remember to call a hook.
 
-## Header e menu mobile
+## Header and mobile menu
 
-Antes não existia navegação nenhuma acima do rodapé.
+Before, there was no navigation at all above the footer.
 
-**Barra fixa com dois estados.** `data-scrolled` liga fundo e borda ao sair do
-topo; `data-hidden` recolhe a barra na descida e devolve na subida. O critério
-é **velocidade**, não direção: com `direction` a barra piscaria a cada
-micro-oscilação do trackpad e, pior, dentro das seções pinadas, onde o scrub
-inverte o sinal o tempo todo.
+**A fixed bar with two states.** `data-scrolled` turns on the background and border when
+leaving the top; `data-hidden` tucks the bar away while scrolling down and brings it back
+on the way up. The criterion is **velocity**, not direction: with `direction` the bar
+would flicker on every trackpad micro-oscillation and, worse, inside the pinned sections,
+where the scrub flips the sign all the time.
 
-Os dois estados são atributos numa classe `.site-header`, não utilitários — e
-isso foi uma descoberta de depuração: ao assumir transforms, o GSAP escreve
-`translate: none` inline, o que anulava o `-translate-y-full` da barra. A
-animação de entrada foi movida para o elemento interno e o `<header>` ficou com
-a propriedade `translate` só para si.
+Both states are attributes on a `.site-header` class, not utilities, and that came out of
+debugging: when it takes over transforms, GSAP writes `translate: none` inline, which
+cancelled the bar's `-translate-y-full`. The entrance animation moved to the inner element,
+and the `<header>` kept the `translate` property to itself.
 
-**Scroll spy** por `IntersectionObserver` numa faixa estreita logo abaixo do
-header — e não por área visível. Com o Movimento ocupando 300vh de pin, o
-critério de área o elegeria como seção corrente quase o tempo todo.
+**Scroll spy** with an `IntersectionObserver` on a narrow band just below the header, not
+by visible area. With the Movement section taking 300vh of pin, the area criterion would
+pick it as the current section almost all the time.
 
-**Menu mobile** em tela cheia: cortina em `clip-path`, links subindo por baixo
-de uma máscara (direções opostas, para ler como duas camadas), foco preso com
-Tab circular, Esc para fechar, foco devolvido ao botão que abriu, e trava de
-scroll que funciona também para quem tem movimento reduzido — nesse caso o
-Lenis nem é instanciado, então a trava vai num atributo no `<html>`.
+**Fullscreen mobile menu:** a `clip-path` curtain, links rising from under a mask
+(opposite directions, so it reads as two layers), a focus trap with circular Tab, Esc to
+close, focus returned to the button that opened it, and a scroll lock that also works for
+people with reduced motion. In that case Lenis is never instantiated, so the lock goes on
+an attribute on `<html>`.
 
-## A seção Movimento
+## The Movement section
 
-Desmontagem do calibre controlada pelo scroll: o relógio começa inteiro, se abre
-camada por camada, expõe o mecanismo girando e volta a se montar.
+A scroll-driven teardown of the movement: the watch starts whole, opens layer by layer,
+shows the mechanism turning and puts itself back together.
 
-**Três divs por peça, uma responsabilidade cada.** `.mv-place` posiciona e
-escala (CSS estático), `.mv-boom` afasta no scroll (GSAP: `scale` + `opacity`),
-`.mv-spin` gira. Separar é obrigatório: os dois efeitos escrevem `transform`, e
-num elemento só um mataria o outro.
+**Three divs per part, one job each.** `.mv-place` positions and scales (static CSS),
+`.mv-boom` pulls it away on scroll (GSAP: `scale` + `opacity`), `.mv-spin` rotates it.
+Splitting them is mandatory: both effects write `transform`, and on a single element one
+would kill the other.
 
-**Escalas medidas, não chutadas.** As peças vieram todas no mesmo diâmetro —
-cada uma preenche o próprio canvas. Cruas, a engrenagem de 48 dentes fica do
-tamanho da caixa. Mediu-se o raio real do conteúdo dentro de cada PNG (bounding
-box do alfa) e resolveu-se `scale = raio_desejado / (raio_medido / lado)`, com a
-caixa em ~0.43 de raio, o mostrador em ~0.335 e a platina em ~0.325 — as
-proporções de um calibre de 38 mm de verdade. Os deslocamentos `x`/`y` tiram o
-trem de rodas do eixo central; as distâncias entre centros vizinhos são a soma
-dos raios, que é a condição para dois dentes se encaixarem.
+**Measured scales, not guessed ones.** The parts all came at the same diameter, each one
+filling its own canvas. Raw, the 48-tooth gear is the size of the case. I measured the
+real radius of the content inside each PNG (the alpha bounding box) and solved
+`scale = target_radius / (measured_radius / side)`, with the case at a ~0.43 radius, the
+dial at ~0.335 and the mainplate at ~0.325: the proportions of a real 38 mm movement. The
+`x`/`y` offsets take the gear train off the central axis; the distances between
+neighboring centers are the sum of the radii, which is the condition for two sets of teeth
+to mesh.
 
-**Rotações contínuas em CSS, oscilações em GSAP.** As sete rotações infinitas
-(barrilete 240s, 48 dentes 120s ⟲, 24 aço 60s, 12 dentes 30s ⟲, 24 latão 60s,
-escape 10s, rotor 8s) são `@keyframes` lineares: compostas na GPU, sem custo de
-main thread, e desligam sozinhas em `prefers-reduced-motion`. Balanço (±30°) e
-âncora (±8°) ficam no GSAP porque `sine.inOut` num yoyo é o perfil de velocidade
-real de um oscilador — rápido no meio do curso, parado nos extremos. Os dois
-usam o mesmo período de 0.4s: é o balanço que empurra a âncora.
+**Continuous rotations in CSS, oscillations in GSAP.** The seven infinite rotations
+(barrel 240s, 48 teeth 120s ⟲, steel 24 teeth 60s, 12 teeth 30s ⟲, brass 24 teeth 60s,
+escape wheel 10s, rotor 8s) are linear `@keyframes`: composited on the GPU, no main-thread
+cost, and they switch off on their own under `prefers-reduced-motion`. The balance (±30°)
+and the pallet fork (±8°) stay in GSAP because `sine.inOut` in a yoyo is the real velocity
+profile of an oscillator: fast in the middle of the swing, still at the ends. Both use the
+same 0.4s period, because the balance is what drives the pallet fork.
 
-**Timeline com duração 1.** As posições são lidas diretamente como progresso do
-scroll — 0.30 na timeline é 30% do trecho pinado (300vh no desktop, 200vh no
-mobile).
+**A timeline with duration 1.** Positions read directly as scroll progress: 0.30 on the
+timeline is 30% of the pinned stretch (300vh on desktop, 200vh on mobile).
 
-| Progresso | O que acontece |
+| Progress | What happens |
 |---|---|
-| 0% | relógio completo |
-| 5–15% | cristal e caixa afastam (`scale` 1 → 1.15, `opacity` → 0) |
-| 15–30% | ponteiros e mostrador afastam |
-| 30–45% | rotor e pontes afastam |
-| 46–72% | mecanismo exposto girando, texto à esquerda |
-| 70–100% | camadas voltam na ordem inversa |
+| 0% | complete watch |
+| 5–15% | crystal and case pull away (`scale` 1 → 1.15, `opacity` → 0) |
+| 15–30% | hands and dial pull away |
+| 30–45% | rotor and bridges pull away |
+| 46–72% | exposed mechanism turning, text on the left |
+| 70–100% | layers come back in reverse order |
 
-**`sizes` derivado da escala da camada.** Todas as camadas ocupam o palco
-inteiro no layout — o que as encolhe é um `transform`, que o navegador ignora ao
-escolher a imagem do srcset. Sem corrigir, a roda de 12 dentes renderizada com
-60px baixaria um arquivo de 700px, dezessete vezes. Com a correção ela pede
-128px: **3 KB em AVIF em vez de 21 KB**.
+**`sizes` derived from the layer's scale.** Every layer fills the whole stage in layout;
+what shrinks it is a `transform`, which the browser ignores when picking from the srcset.
+Without the fix, the 12-tooth wheel rendered at 60px would download a 700px file,
+seventeen times. With the fix it asks for 128px: **3 KB in AVIF instead of 21 KB**.
 
-## Outras decisões de animação
+## Other animation decisions
 
-- **Hero com art direction real.** Desktop e mobile são arquivos diferentes, não
-  crops. Como `next/image` não emite `<picture>`, o `getImageProps` fornece o
-  `srcSet` otimizado de cada um e o `<picture>` é montado à mão: o navegador
-  escolhe a fonte antes do layout, e nenhum dos dois arquivos é baixado à toa.
-- **Loader → Hero.** O loader publica `ready` por contexto; o Hero só toca a
-  entrada depois disso, e o wordmark continua de um tracking mais aberto — como
-  se a tela de abertura tivesse se dissolvido sobre ele. O fim do loader também
-  é o que solta o Lenis, então ele tem uma rede de segurança em `setTimeout`
-  (2s): o GSAP anda no `requestAnimationFrame`, que o navegador congela em aba
-  de fundo — sem a rede, quem abrisse o site num tab que não está à frente
-  encontraria o loader parado e o scroll travado.
-- **Detalhe: a placa manda na moldura, não o contrário.** A foto tem proporção
-  nativa e ocupa toda a largura da coluna; a coluna é que é mais alta que ela, e
-  a folga vertical de ink que sobra é o curso do parallax. O caminho comum
-  (imagem em `cover` numa coluna de 100svh) faz o oposto — escala a foto pela
-  altura e, de um arquivo 16:9, mostra só a tira do meio, ampliada. Aqui não há
-  corte lateral nem upscale.
-- **SplitText manual.** O plugin oficial é pago. O texto fica no HTML como texto
-  corrente (SEO, leitores de tela, no-JS) e o split acontece após a montagem: o
-  agrupamento em linhas vem do `offsetTop` medido pelo navegador, e um
-  `ResizeObserver` refaz tudo quando a largura muda. O efeito acompanha
-  `clamp()` e qualquer viewport sem uma única media query.
-- **Lenis no ticker do GSAP.** Um único rAF para os dois: com dois loops o
-  ScrollTrigger lê posições de um frame anterior e o parallax treme.
-  `lagSmoothing(0)` porque a compensação de lag do GSAP dá saltos no scroll.
-- **Coleção.** A largura do card é derivada da altura da viewport (`42svh` →
-  imagem 3:4), garantindo que o card inteiro caiba em `100svh` — condição para o
-  pin horizontal não cortar o rodapé. A galeria só existe sob a variante
-  `gallery` (≥768px de largura, ≥640px de altura e movimento permitido); o CSS e
-  o `matchMedia` do GSAP usam literalmente a mesma condição, senão o CSS
-  recortaria a seção sem o pin existir e dois modelos ficariam inalcançáveis.
-- **Coleção acessível por teclado.** O track é *transladado*, não rolado, então
-  o navegador não consegue trazer para a tela um card que recebeu foco por Tab —
-  o usuário de teclado ficaria digitando no escuro. Como o deslocamento
-  horizontal é 1:1 com o scroll vertical do pin, um listener de `focusin` soma a
-  mesma quantidade de pixels ao scroll da página. Cada card também ganhou um
-  destino real (`Consultar`, com assunto pré-preenchido) e estados de hover e
-  foco — antes eram blocos decorativos sem ação.
-- **Progresso nos pins.** Um fio de 1px no rodapé das duas seções pinadas
-  acompanha `self.progress`. Num pin de 300vh o usuário não tem como saber
-  quanto falta, e sem esse sinal a seção parece travada em vez de longa.
-- **Lifestyle.** O reveal é por `clip-path`, não por escala: a imagem não se
-  move, quem se move é a janela por onde ela aparece.
-- **Parallax de cursor no Hero.** 24px de curso na fotografia, via `quickTo`
-  (um tween reaproveitado, nada alocado por movimento do mouse), só em
-  `pointer: fine`. E o botão magnético escuta `pointermove` no documento, não
-  `mouseenter` no elemento: a atração começa antes do cursor tocar o botão, que
-  é o que dá sensação de ímã em vez de um salto no hover.
-- **Classes de componente em `@layer components`.** CSS sem camada vence
-  *qualquer* utilitário do Tailwind, independente de especificidade. Enquanto
-  `.parallax-frame` esteve fora de layer, o `position: relative` dela anulava o
-  `md:sticky` da coluna do Detalhe em silêncio — a coluna nunca grudava. Dentro
-  da camada, a ordem volta a ser a esperada: utilitário ganha da classe.
+- **Hero with real art direction.** Desktop and mobile are different files, not crops.
+  Since `next/image` does not emit `<picture>`, `getImageProps` provides each one's
+  optimized `srcSet` and the `<picture>` is built by hand: the browser picks the source
+  before layout, and neither file is downloaded for nothing.
+- **Loader → Hero.** The loader publishes `ready` through context; the Hero only plays its
+  entrance after that, and the wordmark continues from a wider tracking, as if the opening
+  screen had dissolved over it. The end of the loader is also what releases Lenis, so it
+  has a `setTimeout` safety net (2s): GSAP runs on `requestAnimationFrame`, which the
+  browser freezes in background tabs. Without the net, anyone who opened the site in a tab
+  that was not in front would find the loader stuck and the scroll locked.
+- **Detail: the plate sets the frame, not the other way around.** The photo keeps its
+  native ratio and takes the full width of the column; it is the column that is taller
+  than the photo, and the leftover vertical ink is the parallax travel. The usual approach
+  (an image in `cover` inside a 100svh column) does the opposite: it scales the photo by
+  height and, from a 16:9 file, shows only the middle strip, enlarged. Here there is no
+  side crop and no upscaling.
+- **Hand-rolled SplitText.** The official plugin is paid. The text stays in the HTML as
+  running text (SEO, screen readers, no-JS) and the split happens after mount: the grouping
+  into lines comes from the `offsetTop` measured by the browser, and a `ResizeObserver`
+  redoes everything when the width changes. The effect follows `clamp()` and any viewport
+  without a single media query.
+- **Lenis on the GSAP ticker.** One rAF for both: with two loops ScrollTrigger reads
+  positions from the previous frame and the parallax jitters. `lagSmoothing(0)` because
+  GSAP's lag compensation makes the scroll jump.
+- **Collection.** The card width is derived from the viewport height (`42svh` → a 3:4
+  image), which guarantees the whole card fits in `100svh`, the condition for the
+  horizontal pin not to cut off the footer. The gallery only exists under the `gallery`
+  variant (≥768px wide, ≥640px tall and motion allowed); CSS and GSAP's `matchMedia` use
+  literally the same condition, otherwise the CSS would clip the section without the pin
+  existing and two models would be unreachable.
+- **Keyboard-accessible collection.** The track is *translated*, not scrolled, so the
+  browser cannot bring a card that received focus by Tab into view, and a keyboard user
+  would be typing in the dark. Since the horizontal offset is 1:1 with the pin's vertical
+  scroll, a `focusin` listener adds the same number of pixels to the page scroll. Each card
+  also got a real destination (`Consultar`, with a prefilled subject) and hover and focus
+  states; before, they were decorative blocks with no action.
+- **Progress in the pins.** A 1px rule at the bottom of both pinned sections follows
+  `self.progress`. In a 300vh pin the user has no way to know how much is left, and without
+  that signal the section feels stuck instead of long.
+- **Lifestyle.** The reveal is a `clip-path`, not a scale: the image does not move, the
+  window it shows through does.
+- **Cursor parallax in the Hero.** 24px of travel on the photograph, via `quickTo` (one
+  reused tween, nothing allocated per mouse move), only on `pointer: fine`. And the
+  magnetic button listens to `pointermove` on the document, not `mouseenter` on the
+  element: the pull starts before the cursor touches the button, which is what makes it
+  feel like a magnet instead of a jump on hover.
+- **Component classes in `@layer components`.** Unlayered CSS beats *any* Tailwind
+  utility, regardless of specificity. While `.parallax-frame` was outside a layer, its
+  `position: relative` silently cancelled the `md:sticky` of the Detail column, and the
+  column never stuck. Inside the layer, the order is back to what you expect: the utility
+  beats the class.
 
-## Acessibilidade e performance
+## Accessibility and performance
 
-- `prefers-reduced-motion: reduce` desliga GSAP, Lenis, o pin do movimento e
-  todas as rotações; a página fica estática e completa, com o relógio montado.
-- Nenhum estado inicial de animação vive numa classe do HTML — tudo é aplicado
-  por `gsap.set` dentro do efeito. Se o JS falhar, o conteúdo aparece em vez de
-  ficar preso em `opacity: 0`. O loader tem uma regra `<noscript>` pelo mesmo
-  motivo.
-- HTML semântico (`section` + `aria-labelledby`, `dl` para especificações), skip
-  link, foco visível em `--brass`, contraste AA em todas as combinações. O palco
-  do movimento é um `role="img"` com descrição, e as 17 peças aparecem como
-  lista `sr-only`.
-- Alvos de toque de 44px em todo link e botão, via um utilitário `tap-target`
-  que cresce a área por pseudo-elemento — o texto mantém o line-height do
-  design, e nada no layout se move.
-- GSAP só dentro de `useGSAP` — nada roda no SSR, zero erros de hidratação.
-- `next/image` em tudo, AVIF antes de WebP; hero com `priority`, o resto lazy.
-- `will-change` das 34 camadas do calibre é ligado e desligado pelo próprio
-  ScrollTrigger (`onToggle`). Fixo, seriam 34 camadas de composição retidas
-  durante a página inteira.
-- **Sem `overflow-x: hidden` global.** Ele existia e mascarava estouro
-  horizontal em vez de corrigi-lo. Foi removido, e a página foi medida em 15
-  larguras — de 320px a 2560px — com zero overflow em todas.
+- `prefers-reduced-motion: reduce` turns off GSAP, Lenis, the movement pin and every
+  rotation; the page becomes static and complete, with the watch assembled.
+- No initial animation state lives in an HTML class: everything is applied by `gsap.set`
+  inside the effect. If JS fails, the content shows instead of staying stuck at
+  `opacity: 0`. The loader has a `<noscript>` rule for the same reason.
+- Semantic HTML (`section` + `aria-labelledby`, `dl` for specifications), a skip link,
+  visible focus in `--brass`, AA contrast in every combination. The movement stage is a
+  `role="img"` with a description, and the 17 parts are listed as an `sr-only` list.
+- 44px touch targets on every link and button, through a `tap-target` utility that grows
+  the hit area with a pseudo-element: the text keeps the design's line-height and nothing
+  in the layout moves.
+- GSAP only inside `useGSAP`: nothing runs during SSR, zero hydration errors.
+- `next/image` everywhere, AVIF before WebP; the hero with `priority`, the rest lazy.
+- The `will-change` of the movement's 34 layers is turned on and off by the ScrollTrigger
+  itself (`onToggle`). Left on, it would hold 34 compositing layers for the whole page.
+- **No global `overflow-x: hidden`.** It existed and masked horizontal overflow instead of
+  fixing it. It was removed, and the page was measured at 15 widths, from 320px to 2560px,
+  with zero overflow at every one.
 
 ## SEO
 
-`title`, `description`, canonical, Open Graph e Twitter card em `app/layout.tsx`,
-todos alimentados por `lib/site.ts`. Somam-se agora `robots.ts`, `sitemap.ts` e
-JSON-LD (`Brand`, `WebSite` e um `Product` por referência) — os preços do
-structured data vêm do mesmo `data/watches.ts` que a página renderiza, então
-marcação e conteúdo visível não podem divergir.
+`title`, `description`, canonical, Open Graph and Twitter card in `app/layout.tsx`, all fed
+by `lib/site.ts`. On top of that, `robots.ts`, `sitemap.ts` and JSON-LD (`Brand`, `WebSite`
+and one `Product` per model). The structured data prices come from the same
+`data/watches.ts` the page renders, so the markup and the visible content cannot drift
+apart.
 
-## Licença
+## License
 
-Projeto fictício, criado para portfólio. LUME não é uma marca real.
+The code is under the [MIT](LICENSE) license. The images in `/public` and the LUME brand
+are not included: the project is fictional, made for a portfolio, and LUME is not a real
+brand.
+
+## Dependencies
+
+`npm audit --omit=dev` still flags the `postcss` 8.4.31 bundled inside Next 15. It only
+processes the project's own CSS at build time, never third-party input, so the described
+vectors (source maps and attacker-controlled CSS) do not apply. The fix is Next 16.
