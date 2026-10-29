@@ -9,7 +9,7 @@ de luxo minimalista. Projeto de portfólio front-end.
 
 **No ar:** https://lume-psi-three.vercel.app
 
-![Hero do site LUME](public/og.jpg)
+![O hero e, no scroll, o calibre se desmontando e voltando a se montar](docs/demo.gif)
 
 ---
 

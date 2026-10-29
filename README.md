@@ -9,7 +9,7 @@ A front-end portfolio project.
 
 **Live:** https://lume-psi-three.vercel.app
 
-![LUME site hero](public/og.jpg)
+![The hero, then the movement coming apart and back together as the page scrolls](docs/demo.gif)
 
 ---
 
